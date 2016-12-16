@@ -1,0 +1,13 @@
+core_rtl/
+project/
+run/
+sim/
+*.bak
+*.o
+*.elf
+*.lst
+*.map
+*.rec
+FPGA*.txt
+test.html
+test.html.imgtec_forum
