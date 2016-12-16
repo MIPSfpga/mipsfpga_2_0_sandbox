@@ -138,6 +138,13 @@ module mfp_system
     wire [127:0] UDI_fromudi;
     wire [127:0] UDI_toudi;
 
+`ifdef MFP_DEMO_PIPE_BYPASS
+    wire         mpc_aselres_e;
+    wire         mpc_aselwr_e;
+    wire         mpc_bselall_e;
+    wire         mpc_bselres_e;
+`endif
+
     m14k_top m14k_top
     (
         .BistIn                ( BistIn                ),
@@ -242,6 +249,15 @@ module mfp_system
         .TC_Valid              ( TC_Valid              ),
         .UDI_fromudi           ( UDI_fromudi           ),
         .UDI_toudi             ( UDI_toudi             )
+
+`ifdef MFP_DEMO_PIPE_BYPASS
+        ,
+        .mpc_aselres_e         ( mpc_aselres_e         ),     
+        .mpc_aselwr_e          ( mpc_aselwr_e          ),     
+        .mpc_bselall_e         ( mpc_bselall_e         ),     
+        .mpc_bselres_e         ( mpc_bselres_e         )      
+`endif
+
     );
 
         assign BistIn                =   1'b0;
@@ -305,6 +321,24 @@ module mfp_system
 
     assign UART_TX         = 1'b0;
 
+    `ifdef MFP_DEMO_CACHE_MISSES
+
+    wire burst = HTRANS == `HTRANS_NONSEQ && HBURST == `HBURST_WRAP4;
+    assign IO_GreenLEDs = { { `MFP_N_GREEN_LEDS - (1 + 1 + 6) { 1'b0 } }, HCLK, burst, HADDR [7:2] };
+
+    `elsif MFP_DEMO_PIPE_BYPASS
+
+    assign IO_GreenLEDs = { { `MFP_N_GREEN_LEDS - 5 { 1'b0 } },
+
+        HCLK,
+        mpc_aselwr_e,   // Bypass res_w as src A
+        mpc_bselall_e,  // Bypass res_w as src B
+        mpc_aselres_e,  // Bypass res_m as src A
+        mpc_bselres_e   // Bypass res_m as src B
+    };
+
+    `endif
+ 
     `ifdef MFP_DEMO_LIGHT_SENSOR
     wire [15:0] IO_LightSensor;
     `endif
@@ -329,7 +363,15 @@ module mfp_system
         .IO_Switches      (   IO_Switches      ),
         .IO_Buttons       (   IO_Buttons       ),
         .IO_RedLEDs       (   IO_RedLEDs       ),
-        .IO_GreenLEDs     (   IO_GreenLEDs     ), 
+
+        `ifdef MFP_DEMO_CACHE_MISSES
+        .IO_GreenLEDs     (                    ),
+        `elsif MFP_DEMO_PIPE_BYPASS
+        .IO_GreenLEDs     (                    ),
+        `else
+        .IO_GreenLEDs     (   IO_GreenLEDs     ),
+        `endif
+
         .IO_7_SegmentHEX  (   IO_7_SegmentHEX  ),
                                                
         `ifdef MFP_DEMO_LIGHT_SENSOR           
