@@ -58,6 +58,17 @@ ENTRY(hwreset)
 
 SECTIONS
 {
+  /**** Exception vectors ****/
+
+  .reset 0x9fc00000 :   /* Runs uncached (from 0x9fc00000) until I$ is initialized. */
+  {
+    _ftext_init = ABSOLUTE(.) ;	/* Start of init code. */
+    *(.reset)			/* Reset entry point   */
+    *(.boot)			/* Boot code */
+    . = ALIGN(8);
+    _etext_init = ABSOLUTE(.);	/* End of init code. */
+  } = 0
+
   /**** Init Code (executed from reset) ****/
 
   .reset 0x9fc00000 :   /* Runs uncached (from 0x9fc00000) until I$ is initialized. */

@@ -15,5 +15,5 @@ mips-mti-elf-gcc \
 -Wl,--defsym,__stack=0x80040000 \
 -Wl,--defsym,__memory_size=0x1f800 \
 -Wl,-e,0xbfc00000 \
-boot.S excpt_isr.S main.c \
+boot.S exceptions.S main.c \
 -o program.elf
