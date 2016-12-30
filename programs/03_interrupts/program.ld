@@ -60,13 +60,9 @@ SECTIONS
 {
   /**** Exception vectors ****/
 
-  .reset 0x9fc00000 :   /* Runs uncached (from 0x9fc00000) until I$ is initialized. */
+  .exceptions 0x80000000 :   /* Exception vectors. */
   {
-    _ftext_init = ABSOLUTE(.) ;	/* Start of init code. */
-    *(.reset)			/* Reset entry point   */
-    *(.boot)			/* Boot code */
-    . = ALIGN(8);
-    _etext_init = ABSOLUTE(.);	/* End of init code. */
+    *(.exceptions)
   } = 0
 
   /**** Init Code (executed from reset) ****/

@@ -295,7 +295,6 @@ module mfp_system
         assign SI_EICVector          =   6'b0;
         assign SI_EISS               =   4'b0;
         assign SI_Endian             =   1'b0;
-        assign SI_Int                =   8'b0;
         assign SI_IPFDCI             =   3'b0;
         assign SI_IPPCI              =   3'b0;
         assign SI_IPTI               =   3'b0;
@@ -308,6 +307,13 @@ module mfp_system
         assign TC_PibPresent         =   1'b0;
         assign TC_Stall              =   1'b0;
         assign UDI_toudi             = 128'b0;
+
+`ifdef MFP_DEMO_INTERRUPTS
+        assign SI_Int                = { 7'b0, IO_Buttons [1] };
+        assign IO_7_SegmentHEX       = HADDR [`MFP_7_SEGMENT_HEX_WIDTH - 1:0] | IO_Buttons [1];
+`else
+        assign SI_Int                = 8'b0;
+`endif
 
     // Module for hardware reset of EJTAG just after FPGA configuration
     // It pulses EJ_TRST_N low for 16 clock cycles.
@@ -372,7 +378,11 @@ module mfp_system
         .IO_GreenLEDs     (   IO_GreenLEDs     ),
         `endif
 
+        `ifdef MFP_DEMO_INTERRUPTS
+        .IO_7_SegmentHEX  (                    ),
+        `else
         .IO_7_SegmentHEX  (   IO_7_SegmentHEX  ),
+        `endif
                                                
         `ifdef MFP_DEMO_LIGHT_SENSOR           
         .IO_LightSensor   (   IO_LightSensor   ), 

@@ -23,8 +23,9 @@
 `define MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
 `define MFP_USE_UART_PROGRAM_LOADER
 // `define MFP_DEMO_LIGHT_SENSOR
+`define MFP_DEMO_INTERRUPTS
 // `define MFP_DEMO_CACHE_MISSES
-`define MFP_DEMO_PIPE_BYPASS
+// `define MFP_DEMO_PIPE_BYPASS
 
 //
 //  Memory-mapped I/O addresses
@@ -68,7 +69,7 @@
 `ifdef SIMULATION
 `define MFP_RAM_ADDR_WIDTH          16
 `else
-`define MFP_RAM_ADDR_WIDTH          10  // DE1: 10, DE0-Nano: 13, DE0-CV or Basys3: 14, Nexys 4 or DE2-115: 16
+`define MFP_RAM_ADDR_WIDTH          14  // DE1: 10, DE0-Nano: 13, DE0-CV or Basys3: 14, Nexys 4 or DE2-115: 16
 `endif
 
 `define MFP_RESET_RAM_ADDR_MATCH    7'h7f
