@@ -63,6 +63,9 @@ SECTIONS
   .exceptions 0x80000000 :   /* Exception vectors. */
   {
     *(.exceptions)
+    /* For some reason the following is necessary for
+       this section to be kept when .rec is produced */
+    BYTE(0)
   } = 0
 
   /**** Init Code (executed from reset) ****/

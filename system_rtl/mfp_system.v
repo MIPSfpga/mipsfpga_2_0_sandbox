@@ -309,8 +309,7 @@ module mfp_system
         assign UDI_toudi             = 128'b0;
 
 `ifdef MFP_DEMO_INTERRUPTS
-        assign SI_Int                = { 7'b0, IO_Buttons [1] };
-        assign IO_7_SegmentHEX       = HADDR [`MFP_7_SEGMENT_HEX_WIDTH - 1:0] | IO_Buttons [1];
+        assign SI_Int                = { 4'b0, IO_Buttons [3:0] };
 `else
         assign SI_Int                = 8'b0;
 `endif
@@ -378,11 +377,7 @@ module mfp_system
         .IO_GreenLEDs     (   IO_GreenLEDs     ),
         `endif
 
-        `ifdef MFP_DEMO_INTERRUPTS
-        .IO_7_SegmentHEX  (                    ),
-        `else
         .IO_7_SegmentHEX  (   IO_7_SegmentHEX  ),
-        `endif
                                                
         `ifdef MFP_DEMO_LIGHT_SENSOR           
         .IO_LightSensor   (   IO_LightSensor   ), 
