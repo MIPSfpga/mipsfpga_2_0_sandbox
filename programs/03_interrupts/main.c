@@ -47,7 +47,7 @@ int main ()
         mips32_bissr (SR_IE | SR_HINT0 | SR_HINT1 | SR_HINT2 | SR_HINT3 | SR_HINT4 | SR_HINT5);
 
         for (n  = 0;; n  ++)
-            MFP_7_SEGMENT_HEX = n  >> 16;
+            MFP_7_SEGMENT_HEX = n >> 16;
     }
 
     return 0;
