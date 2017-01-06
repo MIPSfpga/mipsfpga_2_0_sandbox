@@ -1,5 +1,3 @@
-#include <mips/regdef.h>
-
 	.set	noreorder	# Don't allow the assembler to reorder instructions.
 	.set	noat
 

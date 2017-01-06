@@ -2,7 +2,7 @@
 
 #include "mfp_memory_mapped_registers.h"
 
-volatile int n ;
+volatile int n;
 
 void __attribute__ ((interrupt, keep_interrupts_masked)) general_exception_handler ()
 {
@@ -11,14 +11,13 @@ void __attribute__ ((interrupt, keep_interrupts_masked)) general_exception_handl
     if (cause & CR_HINT0)
         n  = 0;
     else if (cause & CR_HINT1)
-        n  = 0x10000000;
+        n  = 0x100000;
 }
 
 int main ()
 {
     if (MFP_SWITCHES & 4)  // Switch 2 is on
     {
-    int n;
         // Count without interrupts, polling buttons in the loop
         
         for (n = 0;; n ++)
@@ -28,9 +27,9 @@ int main ()
             if (buttons & 1)
                 n = 0;
             else if (buttons & 2)
-                n = 0x10000000;
-                
-            MFP_7_SEGMENT_HEX = n >> 16;
+                n = 0x100000;
+
+            MFP_7_SEGMENT_HEX = ((n >> 8) & 0xffffff00) | (n & 0xff);
         }
     }
     else
@@ -47,7 +46,7 @@ int main ()
         mips32_bissr (SR_IE | SR_HINT0 | SR_HINT1 | SR_HINT2 | SR_HINT3 | SR_HINT4 | SR_HINT5);
 
         for (n  = 0;; n  ++)
-            MFP_7_SEGMENT_HEX = n >> 16;
+            MFP_7_SEGMENT_HEX = ((n >> 8) & 0xffffff00) | (n & 0xff);
     }
 
     return 0;
