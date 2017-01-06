@@ -9,9 +9,9 @@ void __attribute__ ((interrupt, keep_interrupts_masked)) general_exception_handl
     unsigned cause = mips32_getcr ();
 
     if (cause & CR_HINT0)
-        n  = 0;
+        n = 0;
     else if (cause & CR_HINT1)
-        n  = 0x100000;
+        n = 0x100000;
 }
 
 int main ()
@@ -45,8 +45,14 @@ int main ()
 
         mips32_bissr (SR_IE | SR_HINT0 | SR_HINT1 | SR_HINT2 | SR_HINT3 | SR_HINT4 | SR_HINT5);
 
-        for (n  = 0;; n  ++)
+        for (n = 0;;)
+        {
             MFP_7_SEGMENT_HEX = ((n >> 8) & 0xffffff00) | (n & 0xff);
+            
+            asm ("di");
+            n ++;
+            asm ("ei");
+        }
     }
 
     return 0;
