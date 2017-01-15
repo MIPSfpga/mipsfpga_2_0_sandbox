@@ -1,0 +1,264 @@
+<html>
+<head>
+
+<title>
+MIPSfpga 2.0. Lab YP3 - Introducing interrupts
+</title>
+
+<style>
+
+a, body, th, td
+{
+    font-family : 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
+    font-size   : 12px;
+}
+
+pre
+{
+    font-family : 'Lucida Console', Monaco, monospace;
+    font-size   : 12px;
+}
+
+</style>
+</head>
+<body>
+
+<p><big><b>3. Follow-up projects and exercises</b></big></p>
+
+<p>The topic of interrupts is an important one, and we recommend additional
+exercises to understand it fully.</p>
+
+<p><big><b>3.1 Exercise: Observe the effect of not disabling the interrupts
+around critical section</b></big></p>
+
+<p>Commend out the assembly commands that enable and disable interrupts
+(<i>asm ("di");</i> and <i>asm ("ei")</i>) around incrementing the counter
+variable <i>n</i> in <i>main</i> function inside <i>main.c</i> file:</p>
+
+<blockquote><pre>
+   // asm ("di");
+   n ++;
+   // asm ("ei");
+</pre></blockquote>
+
+<p>Build and re-run the program, using both fast and slow clocks. Can you
+see the difference in system responsiveness to the interrupts? You may
+observe cases when the system takes the interrupt, executes the interrupt
+service routine, but after return from the interrupt, the counter appears
+not reset and continues to increment its old value, set before entering the
+interrupt service routine. Can you explain what is going on? We recommend to
+analyze the assembly output of <i>gcc</i> compiler by running
+<i>01_compile_c_to_assembly.sh</i> under Linux or
+<i>01_compile_c_to_assembly.bat</i> under Windows.</p>
+
+<p><big><b>3.2 Exercise: Synchronize the updates of a counter variable using
+<i>LL/SC</i> (Load-Linked / Store-Conditional) pair of
+instructions</b></big></p>
+
+<p>MIPS architecture provides a way of synchronizing variable updates
+without disabling interrupts, using a special pair of instructions
+<i>LL/SC</i> (Load-Linked / Store-Conditional). Create a version of
+<i>main.c</i> that uses this feature of the processor instead of
+<i>DI/EI</i> pair of instructions used in this lab and <i>Exercise 3.1</i>.
+If you are not familiar with <i>LL/SC</i>, you can review the following
+materials:</p>
+
+<ol>
+
+<li><i>MIPS32&reg; microAptiv&trade; UP Processor Core Family Software
+User's Manual</i>, section 12.3, the descriptions of <i>LL</i> and <i>SC</i>
+instructions. This manual is included in <i>MIPSfpga</i> package</li>
+
+<li>Book <i>See MIPS Run, Second Edition, by Dominic Sweetman</i>, sections
+<i>5.8.4 Critical Regions with Interrupts Enabled: Semaphores the MIPS
+Way</i> and <i>8.5.2 Load-Linked / Store-Conditional</i>.</li>
+
+</ol>
+
+<p>You can implement this exercise using either a function written in
+assembly and called from <i>main</i>, or, alternatively, using <i>asm</i>
+construct in C with parameters, as described in online GCC documentation (<a
+href="https://gcc.gnu.org/onlinedocs">https://gcc.gnu.org/onlinedocs</a>),
+see <a href="https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html">6.45.2
+Extended Asm - Assembler Instructions with C Expression Operands</a></p>
+
+<p><big><b>3.3 Investigation: Why do we need <i>volatile</i> qualifier for
+the counter variable?</b></big></p>
+
+<p>Review the code of <i>main.c</i>. Why do we need counter variable
+<i>n</i> to be declared with <i>volatile</i> qualifier? What is the scenario
+the absense of this qualifier changes the results of program execution? Try
+to run the program without <i>volatile</i> with different levels of compiler
+optimizations. Is there any change in behavior? Review the code produced by
+<i>gcc</i> compiler with different <i>-O</i> settings.</p>
+
+<p><big><b>3.4 Student project and investigation: Non-maskable-interrupt
+(NMI) lab</b></big></p>
+
+<p>Study the information about non-maskable-interrupts (NMI) in
+<li><i>MIPS32&reg; microAptiv&trade; UP Processor Core Family Software
+User's Manual</i> and <li><i>MIPS32&reg; microAptiv&trade; UP Integrator's
+Guide</i>, included in <i>MIPSfpga</i> package.</p> Create a lab that
+demonstrates NMI interrupts. Investigate using internet the history of NMI
+in different computers. Why was this feature necessary in the past? How
+useful is this feature for the modern applications?</p>
+
+<p><big><b>3.5 Student project: Timer interrupt lab using
+<i>Count/Compare</i> pair of Coprocessor 0 registers present inside <i>MIPS
+microAptiv UP</i> core</b></big></p>
+
+<p>Timer interrupt is a special kind of hardware interrupt that occurs
+regularly, with a set frequency, usually in kiloherz range. Such interrupts
+are used to measure time intervals and to implement software multitasking,
+including parallel task execution in operating systems.</p>
+
+<p>Read both hardware and software documentation about an embedded timer
+interrupt used in MIPS cores in conjunctions with <i>Count/Compare</i> pair
+of Coprocessor 0 registers. Is this feature present in MIPSfpga? If yes,
+implement a lab that uses this feature.</p>
+
+<p><big><b>3.6 Student project: Timer interrupt lab using a custom timer
+module implemented outside <i>MIPS microAptiv UP</i> core</b></big></p>
+
+<p>Create an alternative implementation of the timer interrupt lab (Exercise
+3.5), without using the timer interrupt already implemented in <i>MIPS
+microAptive UP</i> core. In order to create such implementation, write a
+custom timer interrupt-generating module in Verilog, and connect it to one
+of hardware interrupt pins, bits of <i>SI_Int</i> external signal.</p>
+
+<p><big><b>3.7 Student project: Programmable timer interrupt lab using a
+custom timer module implemented outside <i>MIPS microAptiv UP</i>
+core</b></big></p>
+
+<p>Extend the student project 3.6 by interfacing the timer
+interupt-generating module not only to system clock, reset and <i>SI_Int</i>
+signal, but also to the system's <i>AHB-Lite</i> bus, so that the frequency
+of interrupts can be controlled by the software running on MIPSfpga CPU
+core. For the details of <i>AHB-Lite</i> interfacing, see <i>Lab YP2 -
+Integrating a peripheral: light sensor example</i>.</p>
+
+<p><big><b>3.8 Student project: A variant of programmable timer interrupt
+lab that uses multiple counters and interrupt pins</b></big></p>
+
+<p>Create a version of the student project 3.7 that uses multiple counters
+to generate hardware interrupts with different frequences on different
+hardware pins (bits of the signal <i>SI_Int</i>).</p>
+
+<p><big><b>3.9 Student exercise: Improve the interrupt lab by exposing
+program counter (PC) to outside seven-segment display</b></big></p>
+
+<p>Create a variant of the interrupt lab that connects the processor's
+program counter (PC) to the outside multiple-digit seven-segment display.
+This connection should be muxed with the regular seven-segment display
+output and should be dependent on whether some selected switch or button is
+pressed. With this setup, when the system clock is turned into slow mode, it
+will be possible to observe how the processor enters interrupt service
+routune.</p>
+
+<p><big><b>3.10 Student investigation: Which Coprocessor 0 register bits
+should be exposed to outside LEDs to observe interrupts in action in
+slow-clock mode?</b></big></p>
+
+<p>Find on Imagination Technologies website <a
+href="http://imgtec.com">http://imgtec.com</a> a manual called <i>MIPS&reg;
+Architecture For Programmers Volume III: The MIPS32&reg; and
+microMIPS32&trade; Privileged Resource Architecture</i>. Investigate which
+Coprocessor 0 register fields are interesting to observe when the processor
+core takes an interrupt and enters the interrupt service routine in
+slow-clock mode. An example of such field is <i>EXL</i> (<i>Exception
+Level</i>) bit of Coprocessor 0 <i>Status</i> register.</p>
+
+<p>Modify the core and system RTL to connect these Coprocessor 0 registers
+to external LEDs on FPGA board. Some fields, like <i>Status.EXL</i> do not
+require changes in core RTL because the original core RTL already outputs
+its value to the external pin, <i>SI_EXL</i>. Exposing such fields requires
+only changes in the system RTL (<i>system_rtl/mfp_*.v</i> files) . Other
+fields may require adding additional ports and connections to core's RTL
+(<i>core_rtl/m14k_*.v</i> files) as well.</p>
+
+<p>Document your changes and create a post on MIPSfpga forum of Imagination
+Technologies website.</p>
+
+<p><big><b>3.11 Advanced student project: Evaluating the usefulness and
+applications of Vectored Interrupt (VI) mode in MIPS
+architecture</b></big></p>
+
+<p>MIPS microAptiv UP core, used MIPSfpga, supports three interrupt modes:
+Interrupt Compatibility mode, Vectored Interrupt (VI) mode, and External
+Interrupt Controller (EIC) mode. So far, the lab and exercises 3.1-3.10 were
+using Interrupt Compatibility mode. An alternative Vectored Interrupt (VI)
+mode adds the ability to prioritize and vector interrupts to a handler
+dedicated to that interrupt, and to assign a GPR (General Purpose Register)
+shadow set for use during interrupt processing.</p>
+
+<p>Study the documentation and create a lab demonstrating interrupts in
+Vectored Interrupt mode. How many clock cycles does this mode save when an
+interrupt is taken? When does it make sense to use this mode? Consider very
+low-power / low-frequency applications, interrupt response time, usage of
+shadow GPR registers (not present in MIPSfpga).</p>
+
+<p>Which interrupt mode is used in Linux? Can you offer an explanation
+why?</p>
+
+<p><big><b>3.12 Advanced student project: Building External Interrupt
+Controller (EIC)</b></big></p>
+
+<p>The External Interrupt Controller (EIC) mode is another interrupt mode,
+supported by MIPS microAptiv UP core in MIPSfpga. EIC mode redefines the way
+interrupts are handled to provide full support for an external interrupt
+controller that handles prioritization and vectoring of interrupts. EIC mode
+is used in MIPS-based microcontrollers from Microchip Technology, including
+some microcontrollers from Microchip PIC32MZ family that are built around
+MIPS microAptiv UP core, the same core used in MIPSfpga.</p>
+
+<p>The functionality of External Interrupt Controller created by Microchip
+is described in Microchip software documentation, the courses taught by
+Microchip during Microchip Master Conference, as well as in Imagination,
+Microchip and Digilent-sponsored course <i>Connected MCU</i> created by Dr.
+Alexander Dean of North Carolina State University.</p>
+
+<p>MIPSfpga allows you to create an alternative External Interrupt
+Controller, with its own interrupt scheduling and prioritization, and
+compare your solution to the solution from Microchip Technology. This is a
+significant research project that can be combined with studies on Real-Time
+Operating Systems (RTOS).</p>
+
+<p><big><b>3.13 Medium-to-advanced student project: Create a lab
+demonstating multitasking / context switching</b></big></p>
+
+<p>An important application of timer interrupts is to facilitate a variant
+of parallel programming called task switching, or context switching. Context
+switching is widely used in operating systems, from relatively simple, like
+FreeRTOS, to complicated, like Linux.</p>
+
+<p>The idea of context switching is to periodically switch between different
+threads of execution, that are also sometimes called processes or tasks. The
+"context" is a reference to a set of information associated with the task,
+including program counter (PC) and general-purpose registers (GPR). The
+switch happens inside the timer interrupt service routine that saves the
+current context in some memory structure (called in some systems Process
+Control Block - PCB), then restores the context a different process from
+another PCB and exits the timer interrupt into the new thread of
+execution.</p>
+
+<p>Create a lab that switches between two different C functions, running in
+parallel. You don't need to use any operating system to do this. Just save
+and restore all the necessary registers inside the timer interrupt service
+routine, and maintain an illusion of parallel execution of two C programs
+for the end-user, who observes outputs from two programs on LEDs or other
+output devices.</p>
+
+<p><big><b>3.14 Advanced student project: Port some open-source RTOS, like
+FreeRTOS, to MIPSfpga</b></big></p>
+
+<p>FreeRTOS is a popular real-time operating system, used as an example RTOS
+in course <i>Connected MCU</i> created by Dr.Alexander Dean of North
+Carolina State University. The <i>Connected MCU</i> course demonstrates
+FreeRTOS on Microchip PIC32MZ microcontroller that uses a processor core
+common with MIPSfpga. However PIC32MZ uses External Interrupt Controller
+which is absent in the default MIPSfpga system which uses Interrupt
+Compatibility Mode. Porting FreeRTOS on MIPSfpga should be an appropriate
+project for a graduate student of embedded programming or computer
+architecture.</p>
+</body>
+</html>
