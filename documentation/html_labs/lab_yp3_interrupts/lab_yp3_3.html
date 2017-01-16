@@ -351,3 +351,72 @@ switches 4, 5 and 6 set to 000, 001, 010, 011, 100, 101. Does the expected
 behavior, based on reviewing the assembly code, always matches the pattern?
 If not, look to the logic that uses bypass control signals and try to
 explain what happens.</p>
+
+
+
+
+system_rtl/mfp_ahb_lite_matrix_config.vh
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.39.30.png"
+/>
+
+system_rtl/mfp_system.v
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.38.43.png"
+/>
+
+programs/03_interrupts/main.c no interrupts
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.18.06.png"
+/>
+
+programs/03_interrupts/main.c interrupt handler
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.17.21.png"
+/>
+
+programs/03_interrupts/main.c interrupt handler
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.18.51.png"
+/>
+
+programs/03_interrupts/exceptions.S
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.27.09.png"
+/>
+
+programs/03_interrupts/program.ld
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.31.16.png"
+/>
+
+programs/03_interrupts/program.dis interrupt vector
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-21.09.07.png"
+/>
+
+programs/03_interrupts/program.dis interrupt handler
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-21.09.56.png"
+/>
+
+programs/03_interrupts/program.dis setting up the interrupts
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-21.17.34.png"
+/>
+
+programs/03_interrupts/program.dis di / increment / ei
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-21.11.05.png"
+/>
