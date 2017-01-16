@@ -6,11 +6,11 @@ volatile int n;
 
 void __attribute__ ((interrupt, keep_interrupts_masked)) general_exception_handler ()
 {
-    unsigned cause = mips32_getcr ();
+    unsigned cause = mips32_getcr ();  // Coprocessor 0 Cause register
 
-    if (cause & CR_HINT0)
+    if (cause & CR_HINT0)  // Checking whether interrupt 0 is pending
         n = 0;
-    else if (cause & CR_HINT1)
+    else if (cause & CR_HINT1)  // Checking whether interrupt 1 is pending
         n = 0x100000;
 }
 
@@ -28,6 +28,9 @@ int main ()
                 n = 0;
             else if (buttons & 2)
                 n = 0x100000;
+
+            // Assigning to 7-segment indicator this value
+            // makes count visible with both slow and fast clock
 
             MFP_7_SEGMENT_HEX = ((n >> 8) & 0xffffff00) | (n & 0xff);
         }
@@ -49,9 +52,9 @@ int main ()
         {
             MFP_7_SEGMENT_HEX = ((n >> 8) & 0xffffff00) | (n & 0xff);
             
-            asm ("di");
+            asm ("di");  // Disable interrupts
             n ++;
-            asm ("ei");
+            asm ("ei");  // Enable interrupts
         }
     }
 
