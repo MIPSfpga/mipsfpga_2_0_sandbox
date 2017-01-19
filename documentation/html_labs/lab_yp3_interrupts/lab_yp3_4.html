@@ -63,7 +63,7 @@ Extended Asm - Assembler Instructions with C Expression Operands</a></p>
 the counter variable?</b></big></p>
 
 <p>Review the code of <i>main.c</i>. Why do we need counter variable
-<i>n</i> to be declared with <i>volatile</i> qualifier? How does the absense
+<i>n</i> to be declared with <i>volatile</i> qualifier? How does the absence
 of this qualifier change the result of program execution? Try to run the
 program without <i>volatile</i> with different levels of compiler
 optimizations. Is there any change in behavior? Review the code produced by
@@ -112,7 +112,7 @@ custom timer module implemented outside <i>MIPS microAptiv UP</i>
 core</b></big></p>
 
 <p>Extend the student project 3.6 by interfacing the timer
-interupt-generating module not only to system clock, reset and <i>SI_Int</i>
+interrupt-generating module not only to system clock, reset and <i>SI_Int</i>
 signal, but also to the system's <i>AHB-Lite</i> bus. The goal is that the
 frequency of interrupts can be controlled by the software running on
 MIPSfpga CPU core. For the details of <i>AHB-Lite</i> interfacing, see
@@ -179,10 +179,18 @@ interrupt is taken? When does it make sense to use this mode? Consider very
 low-power / low-frequency applications, interrupt response time, usage of
 shadow GPR registers (not present in MIPSfpga).</p>
 
-<p>Which interrupt mode is used in Linux? Can you offer an explanation
+<p>Which interrupt mode is used in Linux?  Can you offer an explanation
 why?</p>
 
-<p><big><b>3.12 Advanced student project: Building External Interrupt
+<p><big><b>3.12 Investigation: Read about <i>IV</i> bit of <i>Cause</i>
+Coprocessor 0 register.  Why would anybody need such interrupt option?  What
+problem is solved by this option?  Propose possible answers.</b></big></p>
+
+<p><big><b>3.13 Investigation: Read about <i>EBase</i> Coprocessor 0
+register and try to explain its usefulness.  It is only for multiprocessor
+systems?  How would you use it in a single-processor system?</b></big></p>
+
+<p><big><b>3.14 Advanced student project: Building External Interrupt
 Controller (EIC)</b></big></p>
 
 <p>The External Interrupt Controller (EIC) mode is another interrupt mode,
@@ -206,8 +214,8 @@ compare your solution to the solution from Microchip Technology. This is a
 significant research project that can be combined with studies on Real-Time
 Operating Systems (RTOS).</p>
 
-<p><big><b>3.13 Medium-to-advanced student project: Create a lab
-demonstating multitasking / context switching</b></big></p>
+<p><big><b>3.15 Medium-to-advanced student project: Create a lab
+demonstrating the multitasking / context switching</b></big></p>
 
 <p>An important application of timer interrupts is to facilitate a variant
 of parallel programming called task switching, or context switching. Context
@@ -231,7 +239,7 @@ routine, and maintain an illusion of parallel execution of two C programs
 for the end-user. The end-user would observe the outputs from two programs
 on LEDs or other output devices.</p>
 
-<p><big><b>3.14 Advanced student project: Port some open-source RTOS, like
+<p><big><b>3.16 Advanced student project: Port some open-source RTOS, like
 FreeRTOS, to MIPSfpga</b></big></p>
 
 <p>FreeRTOS is a popular real-time operating system, used as an example RTOS
@@ -244,4 +252,13 @@ Compatibility Mode. Porting FreeRTOS on MIPSfpga should be an appropriate
 project for a graduate student of embedded programming or computer
 architecture.</p>
 
-PIPELINE and INTERRUPTS
+<p><big><b>3.17 Advanced student project: Create a lab demonstrating the
+effect of the interrupts on processor pipelining</b></big></p>
+
+<p>Connect the pipeline control signals to external LEDs on FPGA board and
+demonstrate how an interrupt flushes the processor pipeline from the
+instructions which are not going to graduate because of the interrupt. 
+Which stage of the pipeline is used to take a pending interrupt?</p>
+
+<p>If you need more information about CPU pipeling in MIPSfpga, you can
+review <i>MIPSfpga 2.0.  Lab YP5 - The first glance into pipelining</i>.</p>
