@@ -8,90 +8,41 @@ BusBlaster board and OpenOCD software</i>.  Such generic steps are not
 described in this section.  Only the steps different from <i>Lab YP1</i> are
 explained in details.</p>
 
+<p><big><b>3.1. Briefly review the reference materials</b></big></p>
+
+<p>Look into <i>Appendix A.  A list of recommended materials to review
+before and during the interrupt lab</i>.  Briefly review the listed
+materials to get understanding where to look for the reference information
+during the lab.</p>
+
+<p><big><b>3.2.  Review the information about interrupt-related hardware
+signals</b></big></p>
+
+<p>Review <i>MIPS32&reg; microAptiv&trade; UP Integrator's Guide</i>,
+<i>Chapter 4: Interrupt Interface</i>.  This manual is included in
+<i>MIPSfpga</i> package.  The most important information is the description
+of interrupt pin signal <i>SI_Int</i> used in the lab.  In the course of the
+lab this multi-bit signal is connected to the buttons on FPGA board.  This
+allows triggering different interrupt by pressing the corresonding
+buttons.</p>
 
 
-
-<p>Briefly review the following materials.  You can use them as reference
-during the lab:</p>
-
-
-
-
-<p><big><b>3.4. Review lab code modifications in <i>system_rtl</i> and
-<i>testbench</i> directories</b></big></p>
-
-<p>Search for <i>MFP_DEMO_PIPE_BYPASS</i> symbol in <i>system_rtl</i> and
-<i>testbench</i> directories. Review the code fragments where that symbol
-occurs.</p>
+<p><big><b>3.3. Setup the hardware configuration parameters</b></big></p>
 
 <p>Modify the configuration parameters in the file
 <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i> as follows:</p>
 
-<blockquote><pre>
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.39.30.png"
+/>
 
-//
-//  Configuration parameters
-//
+<p><big><b>3.4. Review the lab-specific hardware modifications</b></big></p>
 
-// `define MFP_USE_WORD_MEMORY
-// `define MFP_INITIALIZE_MEMORY_FROM_TXT_FILE
-   `define MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
-   `define MFP_USE_UART_PROGRAM_LOADER
-// `define MFP_DEMO_LIGHT_SENSOR
-// `define MFP_DEMO_CACHE_MISSES
-   `define MFP_DEMO_PIPE_BYPASS
+<p>Review the following fragment of <i>system_rtl/mfp_system.v</i>:</p>
 
-</pre></blockquote>
-
-<p>Review the following fragments of <i>system_rtl/mfp_system.v</i>:</p>
-
-<blockquote><pre>
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-`ifdef MFP_DEMO_PIPE_BYPASS
-    wire         mpc_aselres_e;
-    wire         mpc_aselwr_e;
-    wire         mpc_bselall_e;
-    wire         mpc_bselres_e;
-`endif
-
-    m14k_top m14k_top
-    (
-
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-        .UDI_toudi             ( UDI_toudi             )
-
-`ifdef MFP_DEMO_PIPE_BYPASS
-        ,
-        .mpc_aselres_e         ( mpc_aselres_e         ),     
-        .mpc_aselwr_e          ( mpc_aselwr_e          ),     
-        .mpc_bselall_e         ( mpc_bselall_e         ),     
-        .mpc_bselres_e         ( mpc_bselres_e         )      
-`endif
-
-    );
-
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-    `ifdef MFP_DEMO_CACHE_MISSES
-
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-    `elsif MFP_DEMO_PIPE_BYPASS
-
-    assign IO_GreenLEDs = { { `MFP_N_GREEN_LEDS - 5 { 1'b0 } },
-
-        HCLK,
-        mpc_aselres_e,  // Bypass res_m as src A
-        mpc_bselres_e   // Bypass res_m as src B
-        mpc_aselwr_e,   // Bypass res_w as src A
-        mpc_bselall_e,  // Bypass res_w as src B
-    };
-
-    `endif
-
-</pre></blockquote>
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.38.43.png"
+/>
 
 <p><big><b>3.5.  Connect the board to the computer</b></big></p>
 
@@ -151,61 +102,32 @@ cd programs/lab_yp3
 00_clean_all.sh
 </pre></blockquote>
 
-<p><big><b>3.8.  Review the lab program code</b></big></p>
+<p><big><b>3.8.  Review the portion of the lab program code that does not
+use interrupts</b></big></p>
 
-<p>The main program is located in file <i>programs/lab_yp3/main.c</i>. After
-reset and running the boot sequence the <i>main()</i> function calls one of
-several routines written in assembly language, depending on the position of
-three switches in the board: <i>sw[4]</i>, <i>sw[5]</i>, <i>sw[6]</i>:</p>
+<p>The <i>main()</i> function is located in file
+<i>programs/03_interrupts/main.c</i>.  This function is executed after the
+reset and running the boot sequence.  The main function in this lab simply
+runs a counter and outputs its value on a multi-digit seven-segment display
+on FPGA board.</p>
 
-<blockquote><p>File <i>programs/lab_yp3/main.c</i></p>
-<pre>
+<p>The output value is constructed from both high and low bits of the
+counter.  This allows the student to observe the digits on the display
+changing when running the synthesized system with either fast clock (50 MHz)
+and ultra-slow clock (0.75 Hz or 12.5 Hz).</p>
 
-#include "mfp_memory_mapped_registers.h"
+<p>Depending on the position of a switch 2, the program can either run with
+or without interrupts.  In both cases it resets the counter to predefined
+values when either button 0 or button 1 is pressed.</p>
 
-int main ()
-{
-    MFP_7_SEGMENT_HEX = MFP_SWITCHES >> 4;
+<p>Note that on some FPGA boards button 0 is used as system reset.  For such
+boards you can either do the whole lab only using button 1 or resynthesize
+the system, connecting reset to a button or a switch other than button
+0.</p>
 
-    switch (MFP_SWITCHES >> 4)
-    {
-        case 0: demo_bypass_a_from_alu_instruction        (); break;
-        case 1: demo_bypass_b_from_alu_instruction        (); break;
-        case 2: demo_bypass_a_and_b_from_alu_instruction  (); break;
-        case 3: demo_bypass_a_from_load_instruction       (); break;
-        case 4: demo_bypass_b_from_load_instruction       (); break;
-        case 5: demo_bypass_a_and_b_from_load_instruction (); break;
-    }
-
-    return 0;
-}
-
-</pre></blockquote>
-
-<p>The assembly subroutines are located in <i>programs/lab_yp3/demo_bypasses.S</i>.
-They written in a way to cause different types of pipeline forwarding
-in the simplest fashion, with one forwarded register and without cycle timing
-effects due to cache misses. For example, subroutine <i>demo_bypass_a_from_alu_instruction</i>:</p>
-
-<blockquote><p>File <i>programs/lab_yp3/demo_bypasses.S</i></p>
-<pre>
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-        .text
-
-        .global demo_bypass_a_from_alu_instruction
-
-demo_bypass_a_from_alu_instruction:
-
-        li      t0, 0x001
-        li      t1, 0x010
-1:
-        addiu   t1, t0, 1
-        addu    t2, t1, t0
-        b       1b
-        nop
-
-</pre></blockquote>
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.18.06.png"
+/>
 
 <p><big><b>3.9.  Prepare the first software run</b></big></p>
 
@@ -228,12 +150,12 @@ memory of the synthesized MIPSfpga-based system on the board.</p>
 <li>edit 12_upload_to_the_board_using_uart.bat based on the result from the
 previous step - set the working port in “set a=” assignment.</li>
 
-<li>Make sure the switches 0, 1, 4, 5, 6 on FPGA board are turned off. 
-Switches 0 and 1 control the speed of the clock, while switches 4, 5, and 6
-determines which pipeline bypass demo function is called after reset and
-boot sequence
- - see <i>3.8.  Review the lab program code</i>.  If the switches 0
-and 1 are not off, the loading through UART is not going to work.</li>
+<li>Make sure the switches 0 and 1 on FPGA board are turned off and switch 2
+is turned on.  Switches 0 and 1 control the speed of the clock, while switch
+2 determines whether the program uses interrupts (switch 2 is off) or does
+not use interrupts (switch 2 is on).  See <i>3.8.  Review the lab program
+code</i>.  If the switches 0 and 1 are not off, the loading through UART is
+not going to work.</li>
 
 <li>run 12_upload_to_the_board_using_uart.bat</li>
 
@@ -265,12 +187,12 @@ su - $USER
 <li>edit ./12_upload_to_the_board_using_uart.sh based on the result from the
 previous step - set the working port in “set a=” assignment</li>
 
-<li>Make sure the switches 0, 1, 4, 5, 6 on FPGA board are turned off. 
-Switches 0 and 1 control the speed of the clock, while switches 4, 5, and 6
-determines which pipeline bypass demo function is called after reset and
-boot sequence
- - see <i>3.8.  Review the lab program code</i>.  If the switches 0
-and 1 are not off, the loading through UART is not going to work.</li>
+<li>Make sure the switches 0 and 1 on FPGA board are turned off and switch 2
+is turned on.  Switches 0 and 1 control the speed of the clock, while switch
+2 determines whether the program uses interrupts (switch 2 is off) or does
+not use interrupts (switch 2 is on).  See <i>3.8.  Review the lab program
+code</i>.  If the switches 0 and 1 are not off, the loading through UART is
+not going to work.</li>
 
 <li>./run 12_upload_to_the_board_using_uart.sh</li>
 
@@ -280,11 +202,10 @@ and 1 are not off, the loading through UART is not going to work.</li>
 
 <ol>
 
-<li>Set the switches 4, 5 and 6 on FPGA board to off position. Such setting
-means that after the reset the program will run assembly demo number 0. Make
-sure the switches 0 and 1 are off, otherwise the boot sequence (a sequence
-of processor instructions before <i>main</i> function) will take too long,
-since these switches control the clock frequency.</li>
+<li>Set the switches 0 and 1 on FPGA board to off position and switch 2 to
+on position. Make sure the switches 0 and 1 are off, otherwise the boot
+sequence (a sequence of processor instructions before <i>main</i> function)
+will take too long, since these switches control the clock frequency.</li>
 
 <li><p>Reset the processor.  The reset buttons for each board are listed
 in the table below:</p>
@@ -299,9 +220,10 @@ in the table below:</p>
 <tr><td>Digilent Nexys4 DDR</td><td>Dedicated CPU Reset</td></tr>
 <tr><td>Terasic DE0</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE0-CV</td><td>Dedicated reset button</td></tr>
-<tr><td>Terasic DE0-Nano</td><td>Button/Key 1</td></tr>
+<tr><td>Terasic DE0-Nano</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE1</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE2-115</td><td>Button/Key 0</td></tr>
+<tr><td>Terasic DE10-Lite</td><td>Button/Key 0</td></tr>
 </table></p>
 
 </li>
@@ -313,43 +235,48 @@ blinking, it is connected straight to the system clock.</li>
 <li>Check that the seven-segment display shows "0" which is consistent
 with switches 4, 5, 6 and the code of the program.</li>
 
-<li><p>Now turn your attention to LEDs 0, 1, 2, 3. They are connected to the following
-bypass control signals:</p>
-
-<p><table border=1 cellpadding=10 cellspacing=0 rules=all>
-<tr>
-<th rowspan=2>LEDs (left to right)</th>
-<th colspan=2>Bypass control signals</th>
-</tr>
-<tr>
-<th>Name</th>
-<th>Function (according to the comment in Verilog code)</th>
-</tr>
-<tr><td>3</td><td>mpc_aselres_e</td><td>Bypasses result from M stage (res_m) as source A (rs) for the next instruction</td></tr>
-<tr><td>2</td><td>mpc_bselres_e</td><td>Bypasses result from M stage (res_m) as source B (rt) for the next instruction</td></tr>
-<tr><td>1</td><td>mpc_aselwr_e</td><td>Bypasses result from A stage (res_w) as source A (rs) for the next instruction</td></tr>
-<tr><td>0</td><td>mpc_bselall_e</td><td>Bypasses result from A stage (res_w) as source B (rt) for the next instruction</td></tr>
-</table></p>
-
-</li>
-
-<li><p>You can see LED 3 blinking from time to time, indicating bypass of ALU
-result to the source A of the next instruction. This is consistent with demo
-0 code:</p>
-
-<blockquote><p>File <i>programs/lab_yp3/demo_bypasses.S</i></p>
-<pre>
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-1:
-        addiu   t1, t0, 1
-        addu    t2, t1, t0
-        b       1b
-        nop
-
-</pre></blockquote>
-
 </li>
 </ol>
+
+
+
+
+
+
+
+
+
+
+
+clock. The clock speed is controlled by switches 0 and 1:</p>
+
+
+
+<p><big><b>3.5.  </b></big></p>
+
+<p><big><b>3.6.  </b></big></p>
+
+<p><big><b>3.7.  </b></big></p>
+
+<p><big><b>3.8.  </b></big></p>
+
+<p><big><b>3.9.  </b></big></p>
+
+<p><big><b>3.10.  </b></big></p>
+
+
+
+
+
+
+
+Using the GNU Compiler Collection (GCC)
+
+https://gcc.gnu.org/onlinedocs/gcc/MIPS-Function-Attributes.html
+6.31.18 MIPS Function Attributes
+
+
+
 
 <p><big><b>3.11. The subsequent runs</b></big></p>
 
@@ -362,25 +289,6 @@ If not, look to the logic that uses bypass control signals and try to
 explain what happens.</p>
 
 
-
-
-system_rtl/mfp_ahb_lite_matrix_config.vh
-
-<img
-src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.39.30.png"
-/>
-
-system_rtl/mfp_system.v
-
-<img
-src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.38.43.png"
-/>
-
-programs/03_interrupts/main.c no interrupts
-
-<img
-src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.18.06.png"
-/>
 
 programs/03_interrupts/main.c interrupt handler
 
