@@ -228,91 +228,87 @@ in the table below:</p>
 
 </li>
 
-<li>Turn the switch 0 on.  This will switch the system clock from 25 MHz to
-0.75 Hz, less than one beat per second.  You should see LED 7 start
-blinking, it is connected straight to the system clock.</li>
+<li>Notice the output on seven-segment display.  Press button 1, observe how
+it resets the counter value.</li>
 
-<li>Check that the seven-segment display shows "0" which is consistent
-with switches 4, 5, 6 and the code of the program.</li>
+<li>Turn the switch 1 on.  This will switch the system clock from 25 MHz to
+12.5 Hz / beats per second.  You should see LED 7 start blinking, it is
+connected straight to the system clock.  Notice the speed of counting.</li>
+
+<li>Press button 1, observe how it resets the counter value.</li>
 
 </li>
 </ol>
 
+<p><big><b>3.12.  Review the material that explains the <i>interrupt</i>
+function attribute</b></big></p>
 
+<p>Use the following internet material to make sense of interrupt-specific
+function attributes in the code: <i>Using the GNU Compiler Collection (GCC). 
+6.31.18 MIPS Function Attributes</i> (<a
+href="http://gcc.gnu.org/onlinedocs/gcc/MIPS-Function-Attributes.html">
+http://gcc.gnu.org/onlinedocs/gcc/MIPS-Function-Attributes.html</a>).</p>
 
+<p><big><b>3.13.  Review C macros that are used to access Coprocessor 0
+registers</b></big></p>
 
+<p>Search for <i>mips/cpu.h</i> header file in Codescape GCC compiler
+package.  This file contains a set of macro definitions like
+<i>mips32_getcr</i> and <i>mips32_bicsr</i> that aid in accessing
+Coprocessor 0 registers.  These registers are needed to setup the
+interrupts.</p>
 
+<p><big><b>3.14.  Review <i>Status</i> and <i>Cause</i> Coprocessor 0
+register descriptions</b></big></p>
 
+<p>The following materials are useful for the review:</p>
 
+<ul>
 
+<li>Book <i>See MIPS Run, Second Edition, by Dominic Sweetman</i>,
+<i>Chapter 3.  Coprocessor 0: MIPS Process Control</i></li>
 
+<li><i>MIPS32&reg; microAptiv&trade; UP Processor Core Family Software
+User's Manual</i>, <i>Chapter 6: CP0 Registers of the microAptiv&trade; UP
+Core</i></li>
 
+<li><i>MIPS&reg; Architecture For Programmers Volume III: The MIPS32&reg;
+and microMIPS32&trade; Privileged Resource Architecture</i></li>
 
-clock. The clock speed is controlled by switches 0 and 1:</p>
+</ul>
 
+<p><big><b>3.15.  Review the portion of the lab program code that uses
+interrupts</b></big></p>
 
-
-<p><big><b>3.5.  </b></big></p>
-
-<p><big><b>3.6.  </b></big></p>
-
-<p><big><b>3.7.  </b></big></p>
-
-<p><big><b>3.8.  </b></big></p>
-
-<p><big><b>3.9.  </b></big></p>
-
-<p><big><b>3.10.  </b></big></p>
-
-
-
-
-
-
-
-Using the GNU Compiler Collection (GCC)
-
-https://gcc.gnu.org/onlinedocs/gcc/MIPS-Function-Attributes.html
-6.31.18 MIPS Function Attributes
-
-
-
-
-<p><big><b>3.11. The subsequent runs</b></big></p>
-
-<p>Set the switches 4, 5 and 6 on FPGA board to another position (001), set
-the switch 0 to off position, then reset the processor, turn switch 1 on and
-observe the patterns of blinking again.Repeat for all 6 bypass demos, with
-switches 4, 5 and 6 set to 000, 001, 010, 011, 100, 101. Does the expected
-behavior, based on reviewing the assembly code, always matches the pattern?
-If not, look to the logic that uses bypass control signals and try to
-explain what happens.</p>
-
-
-
-programs/03_interrupts/main.c interrupt handler
+<p>The interrupt handler in <i>programs/03_interrupts/main.c</i>:</p>
 
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.17.21.png"
 />
-
-programs/03_interrupts/main.c interrupt handler
-
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.18.51.png"
 />
 
-programs/03_interrupts/exceptions.S
+<p>The exception vector setup in
+<i>programs/03_interrupts/exceptions.S</i>:</p>
 
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.27.09.png"
 />
 
-programs/03_interrupts/program.ld
+<p>The linker script to accomodate a new section for exception section setup
+in <i>programs/03_interrupts/program.ld</i>:</p>
 
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.31.16.png"
 />
+
+<p><big><b>3.16. Running the program that uses interrupts</b></big></p>
+
+<p>Re-run the step <i>3.10. The first run</i> with switch 2 in "off"
+position. Do you notice the difference in program performance?</p>
+
+TODO
 
 programs/03_interrupts/program.dis interrupt vector
 
