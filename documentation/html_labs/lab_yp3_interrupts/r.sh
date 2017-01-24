@@ -8,6 +8,7 @@ lab_yp3_3.html \
 lab_yp3_4.html \
 lab_yp3_5.html \
 lab_yp3_6.html \
+lab_yp3_7.html \
 lab_yp3_z.html \
 > lab_yp3.html
 
