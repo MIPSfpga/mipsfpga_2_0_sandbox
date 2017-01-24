@@ -1,10 +1,10 @@
 
-<p><big><b>3. Follow-up projects and exercises</b></big></p>
+<p><big><b>5. Follow-up projects and exercises</b></big></p>
 
 <p>The topic of interrupts is an important one, and we recommend additional
 exercises to understand it fully.</p>
 
-<p><big><b>3.1 Exercise: Observe the effect of not disabling the interrupts
+<p><big><b>5.1 Exercise: Observe the effect of not disabling the interrupts
 around critical section that updates the same variable as the interrupt
 handler</b></big></p>
 
@@ -28,7 +28,7 @@ Can you explain what is going on? We recommend to analyze the assembly
 output of <i>gcc</i> compiler by running <i>01_compile_c_to_assembly.sh</i>
 under Linux or <i>01_compile_c_to_assembly.bat</i> under Windows.</p>
 
-<p><big><b>3.2 Exercise: Synchronize the updates of a counter variable using
+<p><big><b>5.2 Exercise: Synchronize the updates of a counter variable using
 <i>LL/SC</i> (Load-Linked / Store-Conditional) pair of
 instructions</b></big></p>
 
@@ -36,7 +36,7 @@ instructions</b></big></p>
 without disabling interrupts, using a special pair of instructions
 <i>LL/SC</i> (Load-Linked / Store-Conditional). Create a version of
 <i>main.c</i> that uses this feature of the processor instead of
-<i>DI/EI</i> pair of instructions used in this lab and <i>Exercise 3.1</i>.
+<i>DI/EI</i> pair of instructions used in this lab and <i>Exercise 5.1</i>.
 If you are not familiar with <i>LL/SC</i>, you can review the following
 materials:</p>
 
@@ -59,7 +59,7 @@ href="https://gcc.gnu.org/onlinedocs">https://gcc.gnu.org/onlinedocs</a>),
 see <a href="https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html">6.45.2
 Extended Asm - Assembler Instructions with C Expression Operands</a></p>
 
-<p><big><b>3.3 Investigation: Why do we need <i>volatile</i> qualifier for
+<p><big><b>5.3 Investigation: Why do we need <i>volatile</i> qualifier for
 the counter variable?</b></big></p>
 
 <p>Review the code of <i>main.c</i>. Why do we need counter variable
@@ -69,7 +69,7 @@ program without <i>volatile</i> with different levels of compiler
 optimizations. Is there any change in behavior? Review the code produced by
 <i>gcc</i> compiler with different <i>-O</i> settings.</p>
 
-<p><big><b>3.4 Student project and investigation: Non-maskable-interrupt
+<p><big><b>5.4 Student project and investigation: Non-maskable-interrupt
 (NMI) lab</b></big></p>
 
 <p>Study the information about non-maskable-interrupts (NMI) in
@@ -82,7 +82,7 @@ internet the history of NMI in different computers. Why was this feature
 necessary in the past? How useful is this feature for the modern
 applications?</p>
 
-<p><big><b>3.5 Student project: Timer interrupt lab using
+<p><big><b>5.5 Student project: Timer interrupt lab using
 <i>Count/Compare</i> pair of Coprocessor 0 registers present inside <i>MIPS
 microAptiv UP</i> core</b></big></p>
 
@@ -98,34 +98,34 @@ yes, implement a lab that uses this feature. This lab may for example
 measure time between pressing some button, or do some computation while the
 interrupt service routine polls some input.</p>
 
-<p><big><b>3.6 Student project: Timer interrupt lab using a custom timer
+<p><big><b>5.6 Student project: Timer interrupt lab using a custom timer
 module implemented outside <i>MIPS microAptiv UP</i> core</b></big></p>
 
 <p>Create an alternative implementation of the timer interrupt lab (Exercise
-3.5), without using the timer interrupt already implemented in <i>MIPS
+5.5), without using the timer interrupt already implemented in <i>MIPS
 microAptiv UP</i> core. In order to create such implementation, write a
 custom timer interrupt-generating module in Verilog. Then connect it to one
 of hardware interrupt pins, bits of <i>SI_Int</i> external signal.</p>
 
-<p><big><b>3.7 Student project: Programmable timer interrupt lab using a
+<p><big><b>5.7 Student project: Programmable timer interrupt lab using a
 custom timer module implemented outside <i>MIPS microAptiv UP</i>
 core</b></big></p>
 
-<p>Extend the student project 3.6 by interfacing the timer
+<p>Extend the student project 5.6 by interfacing the timer
 interrupt-generating module not only to system clock, reset and <i>SI_Int</i>
 signal, but also to the system's <i>AHB-Lite</i> bus. The goal is that the
 frequency of interrupts can be controlled by the software running on
 MIPSfpga CPU core. For the details of <i>AHB-Lite</i> interfacing, see
 <i>Lab YP2 - Integrating a peripheral: light sensor example</i>.</p>
 
-<p><big><b>3.8 Student project: A variant of programmable timer interrupt
+<p><big><b>5.8 Student project: A variant of programmable timer interrupt
 lab that uses multiple counters and interrupt pins</b></big></p>
 
-<p>Create a version of the student project 3.7 that uses multiple counters
+<p>Create a version of the student project 5.7 that uses multiple counters
 to generate hardware interrupts with different frequences on different
 hardware pins (bits of the signal <i>SI_Int</i>).</p>
 
-<p><big><b>3.9 Student exercise: Improve the interrupt lab by exposing
+<p><big><b>5.9 Student exercise: Improve the interrupt lab by exposing
 program counter (PC) to the outside seven-segment display</b></big></p>
 
 <p>Create a variant of the interrupt lab that connects the processor's
@@ -136,7 +136,7 @@ pressed. With this setup, when the system clock is turned into slow mode, it
 will be possible to observe how the processor enters interrupt service
 routune.</p>
 
-<p><big><b>3.10 Student investigation: Which Coprocessor 0 register bits
+<p><big><b>5.10 Student investigation: Which Coprocessor 0 register bits
 should be exposed to outside LEDs to observe interrupts in action in
 slow-clock mode?</b></big></p>
 
@@ -160,14 +160,14 @@ fields may require adding additional ports and connections to the core's RTL
 <p>Document your changes and create a post on MIPSfpga forum of the
 Imagination Technologies website.</p>
 
-<p><big><b>3.11 Advanced student project: Evaluating the usefulness and
+<p><big><b>5.11 Advanced student project: Evaluating the usefulness and
 applications of Vectored Interrupt (VI) mode in MIPS
 architecture</b></big></p>
 
 <p>MIPS microAptiv UP core, used in MIPSfpga, supports three interrupt
 modes: Interrupt Compatibility mode, Vectored Interrupt (VI) mode, and
 External Interrupt Controller (EIC) mode. So far, the lab and exercises
-3.1-3.10 were using the Interrupt Compatibility mode. An alternative
+5.1-5.10 were using the Interrupt Compatibility mode. An alternative
 Vectored Interrupt (VI) mode adds the ability to prioritize and vector
 interrupts to a handler dedicated to that interrupt. Vectored Interrupt mode
 also allows assigning a GPR (General Purpose Register) shadow set for use
@@ -182,15 +182,15 @@ shadow GPR registers (not present in MIPSfpga).</p>
 <p>Which interrupt mode is used in Linux?  Can you offer an explanation
 why?</p>
 
-<p><big><b>3.12 Investigation: Read about <i>IV</i> bit of <i>Cause</i>
+<p><big><b>5.12 Investigation: Read about <i>IV</i> bit of <i>Cause</i>
 Coprocessor 0 register.  Why would anybody need such interrupt option?  What
 problem is solved by this option?  Propose possible answers.</b></big></p>
 
-<p><big><b>3.13 Investigation: Read about <i>EBase</i> Coprocessor 0
+<p><big><b>5.13 Investigation: Read about <i>EBase</i> Coprocessor 0
 register and try to explain its usefulness.  It is only for multiprocessor
 systems?  How would you use it in a single-processor system?</b></big></p>
 
-<p><big><b>3.14 Advanced student project: Building External Interrupt
+<p><big><b>5.14 Advanced student project: Building External Interrupt
 Controller (EIC)</b></big></p>
 
 <p>The External Interrupt Controller (EIC) mode is another interrupt mode,
@@ -214,7 +214,7 @@ compare your solution to the solution from Microchip Technology. This is a
 significant research project that can be combined with studies on Real-Time
 Operating Systems (RTOS).</p>
 
-<p><big><b>3.15 Medium-to-advanced student project: Create a lab
+<p><big><b>5.15 Medium-to-advanced student project: Create a lab
 demonstrating the multitasking / context switching</b></big></p>
 
 <p>An important application of timer interrupts is to facilitate a variant
@@ -239,7 +239,7 @@ routine, and maintain an illusion of parallel execution of two C programs
 for the end-user. The end-user would observe the outputs from two programs
 on LEDs or other output devices.</p>
 
-<p><big><b>3.16 Advanced student project: Port some open-source RTOS, like
+<p><big><b>5.16 Advanced student project: Port some open-source RTOS, like
 FreeRTOS, to MIPSfpga</b></big></p>
 
 <p>FreeRTOS is a popular real-time operating system, used as an example RTOS
@@ -252,7 +252,7 @@ Compatibility Mode. Porting FreeRTOS on MIPSfpga should be an appropriate
 project for a graduate student of embedded programming or computer
 architecture.</p>
 
-<p><big><b>3.17 Advanced student project: Create a lab demonstrating the
+<p><big><b>5.17 Advanced student project: Create a lab demonstrating the
 effect of the interrupts on processor pipelining</b></big></p>
 
 <p>Connect the pipeline control signals to external LEDs on FPGA board and
@@ -263,8 +263,8 @@ Which stage of the pipeline is used to take a pending interrupt?</p>
 <p>If you need more information about CPU pipelining in MIPSfpga, you can
 review <i>MIPSfpga 2.0.  Lab YP5 - The first glance into pipelining</i>.</p>
 
-<p><big><b>3.18 Lab enhancement: Modify the system testbench to study
+<p><big><b>5.18 Lab enhancement: Modify the system testbench to study
 interrupts using Verilog simulation, without synthesizing the design. 
 Create all the necessary scripts to show the main interrupt-related signals
 on the waveform.  Show on the waveform how an interrupt flushes the
-processor pipeline (see the project 3.17).</b></big></p>
+processor pipeline (see the project 5.17).</b></big></p>

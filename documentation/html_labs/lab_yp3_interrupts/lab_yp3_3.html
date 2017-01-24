@@ -285,19 +285,23 @@ interrupts</b></big></p>
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.17.21.png"
 />
+
+<p>Setting up the Coprocessor 0 registers for handling the interrupts in
+<i>programs/03_interrupts/main.c</i>:</p>
+
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.18.51.png"
 />
 
-<p>The exception vector setup in
+<p>Code to setup the exception vector in
 <i>programs/03_interrupts/exceptions.S</i>:</p>
 
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.27.09.png"
 />
 
-<p>The linker script to accommodate a new section for exception section
-setup in <i>programs/03_interrupts/program.ld</i>:</p>
+<p>The linker script which includes a new section for the exception vector
+in <i>programs/03_interrupts/program.ld</i>:</p>
 
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.31.16.png"
@@ -306,7 +310,10 @@ src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01
 <p><big><b>3.16. Running the program that uses interrupts</b></big></p>
 
 <p>Re-run the step <i>3.10. The first run</i> with switch 2 in "off"
-position. Do you notice the difference in program performance?</p>
+position. Do you notice the difference in program performance? Can you
+explain the difference?</p>
+
+<p><big><b>3.17. Running the program that uses interrupts</b></big></p>
 
 TODO
 
