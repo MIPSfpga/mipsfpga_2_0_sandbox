@@ -264,7 +264,22 @@ Which stage of the pipeline is used to take a pending interrupt?</p>
 review <i>MIPSfpga 2.0.  Lab YP5 - The first glance into pipelining</i>.</p>
 
 <p><big><b>5.18 Lab enhancement: Modify the system testbench to study
-interrupts using Verilog simulation, without synthesizing the design. 
-Create all the necessary scripts to show the main interrupt-related signals
-on the waveform.  Show on the waveform how an interrupt flushes the
-processor pipeline (see the project 5.17).</b></big></p>
+interrupts using Verilog simulation, without synthesizing the
+design</b></big></p>
+
+<p>Create all the necessary scripts to show the main interrupt-related
+signals on the waveform.  Show on the waveform how an interrupt flushes the
+processor pipeline (see the project 5.17).</p>
+
+<p><big><b>5.19 Student project: Create a lab demonstrating imprecise Bus
+Error exception</b></big></p>
+
+<p>All interrupts are exceptions triggered by changes in external
+signals, but not all exceptions triggered by changes in external signals are
+in fact interrupts. There is an exception called Bus Error, which is
+triggered by a specific AHB-Lite bus response. This exception is remarkable
+because it is not always precise, i.e. it may occur with <i>EPC</i> pointing
+to a different instruction.</p>
+
+<p>Read about imprecise exceptions and bus errors in documentation and
+create a lab that demonstrates this feature.</p>
