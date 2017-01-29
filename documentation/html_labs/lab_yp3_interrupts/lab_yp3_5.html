@@ -40,7 +40,7 @@ without disabling interrupts, using a special pair of instructions
 If you are not familiar with <i>LL/SC</i>, you can review the following
 materials:</p>
 
-<ol>
+<ul>
 
 <li><i>MIPS32&reg; microAptiv&trade; UP Processor Core Family Software
 User's Manual</i>, section 12.3, the descriptions of <i>LL</i> and <i>SC</i>
@@ -50,7 +50,7 @@ instructions. This manual is included in <i>MIPSfpga</i> package</li>
 <i>5.8.4 Critical Regions with Interrupts Enabled: Semaphores the MIPS
 Way</i> and <i>8.5.2 Load-Linked / Store-Conditional</i>.</li>
 
-</ol>
+</ul>
 
 <p>You can implement this exercise using either a function written in
 assembly and called from <i>main</i>, or, alternatively, using <i>asm</i>
@@ -274,12 +274,113 @@ processor pipeline (see the project 5.17).</p>
 <p><big><b>5.19 Student project: Create a lab demonstrating imprecise Bus
 Error exception</b></big></p>
 
-<p>All interrupts are exceptions triggered by changes in external
-signals, but not all exceptions triggered by changes in external signals are
-in fact interrupts. There is an exception called Bus Error, which is
-triggered by a specific AHB-Lite bus response. This exception is remarkable
-because it is not always precise, i.e. it may occur with <i>EPC</i> pointing
-to a different instruction.</p>
+<p>All interrupts are exceptions triggered by changes in external signals,
+but not all exceptions triggered by changes in external signals are in fact
+interrupts.  There is an exception called Bus Error, which is triggered by a
+specific AHB-Lite bus response.  This exception is remarkable because it is
+not always precise, i.e.  it may occur with <i>EPC</i> pointing to a
+different instruction.</p>
 
 <p>Read about imprecise exceptions and bus errors in documentation and
-create a lab that demonstrates this feature.</p>
+create a lab that demonstrates this feature.  The useful chapters to read
+are:</p>
+
+<ul>
+
+<li><i>MIPS32&reg; microAptiv&trade; UP Integrator's Guide</i>, <i>Table 2.3
+Signal Descriptions for m14k_cpu Level</i>, the description of <i>HRESP</i>
+signal: <i>"The transfer response.  When LOW, the HRESP signal indicates
+that the transfer status is OKAY.  When HIGH, the HRESP signal indicates
+that the transfer status is ERROR."</i>.  This manual is included in
+<i>MIPSfpga</i> package.</li>
+
+<li><i>MIPS32&reg; microAptiv&trade; UP Processor Core Family Software
+User's Manual</i>, section <i>5.8.15 Bus Error Exception — Instruction Fetch
+or Data Access</i>.  Notice the statement <i>"Bus errors taken on the
+requested (critical) word of an instruction fetch or data load are precise. 
+Other bus errors, such as stores or non-critical words of a burst read, can
+be imprecise."</i>.  This manual is included in <i>MIPSfpga</i>
+package.</li>
+
+<li>Book <i>See MIPS Run, Second Edition, by Dominic Sweetman</i>, section
+<i>5.1 Precise Exceptions</i> and <i>Table 3.2 ExcCode Values: Different
+Kinds of Exceptions</i>.</li>
+
+</ul>
+
+<p><big><b>5.20 Student project: Create a lab demonstrating switching from
+the user mode to the kernel mode when entering the interrupt service
+routine</b></big></p>
+
+<p>Processor mode is one of the most important concepts in computer science,
+particularly in the operating system design.  Different CPUs have somewhat
+different modes with different names: user, kernel, priviledged, superuser
+and others.  MIPS32 architecture supports user mode, kernel mode and
+supervisor mode.  According to <i>See MIPS Run, Second Edition, by Dominic
+Sweetman</i> the supervisor mode in MIPS is a historical accident, a feature
+that was added by a customer request, but was practially never used in a
+real system.  So only the user and kernel modes are really used.</p>
+
+<p>In the latest releases of MIPS32 architecture there are some additional
+modes: root mode and guest mode.  These modes are related to
+hardware-assisted CPU virtualization, which should not to be confused with
+the virtual memory feature.  The virtual memory is present even in CPU cores
+without hardware-assisted virtualization, including MIPS microAptiv UP core
+used in MIPSfpga.  However the hardware-assisted virtualization is not
+present in MIPSfpga, so we are not concern about root and guest modes
+here.</p>
+
+<p>The processor in kernel mode has complete access to all its architecture
+resources, it can execute all instructions, access all memory locations and
+all system Coprocessor 0 registers.  This mode is used to run operating
+system and device drivers.</p>
+
+<p>The processor in user mode can execute only a subset of instructions, has
+no access to system coprocessor registers, and controlled access to memory
+locations.  This mode is used to run application programs that may be less
+reliable than the operating system.</p>
+
+<p>When an interrupt or, in general, an exception occures, a processor
+switches its mode from user to kernel and jumps to an exception handler, a
+piece of code that handles the exception.  When process the exception, the
+operating system performs the necessary actions.  Examples of such
+actions:<p>
+
+<ul>
+
+<li>If the user code attempted to access a location in memory it should not
+acess, the operating system can terminate the user code, keeping the memory
+of the rest of the system (both OS and other application's memory) in
+order.</li>
+
+<li>If the exception is caused by the system timer interrupt, the interrupt
+service routine can switch the task/process context and return from the
+exception into another user task/process.</li>
+
+<li>If the interrupt came from an input-output device, the interrupt service
+routine can perform some action related to access to memory-mapped
+input-output registers.  An example of such action is getting a byte
+transmitted by SPI protocol and putting it into a buffer that can be later
+accessed by the application code.</li>
+
+<li>There are also special user-mode instructions that cause the intentional
+exeptions, requesting the system to perform some action in kernel mode.  In
+MIPS such instruction is called <i>syscall.</i>
+
+<li>Finally, an exception can be caused by an illegal instruction or an
+instruction that is not permitted in user mode.  The exception handler can
+try to emulate the instruction instead of terminating the user code.</li>
+
+</ul>
+
+<p>Create a lab using MIPSfpga that demonstrates how the processor entering
+the user mode.  This lab can expose <i>KSU</i> ("kernel/supervisor/user")
+field of Coprocessor 0 <i>Status</i> register by connecting it to the LEDs
+on FPGA board and running the system using slow 0.75 Hz or 12.5 Hz clock.<p>
+
+<p>The main challenge in creating this lab is the need to modify the boot
+code of the software example.  The current boot code exists the reset into
+kernel mode, this should be changed into user mode.  The current boot code
+also does not initialize virtual address mapping for the user mode.  See the
+documentation on translation lookaside buffer (TLB) and memory-management
+unit and modify the boot code to support the new lab.</p>
