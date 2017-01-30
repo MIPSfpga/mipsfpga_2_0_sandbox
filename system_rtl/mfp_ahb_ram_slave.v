@@ -24,6 +24,7 @@ module mfp_ahb_ram_slave
 
     // Ignored: HMASTLOCK, HPROT
     // TODO: SI_Endian
+    // TODO: Add delaying HBURST and HSIZE
 
     assign HREADY = 1'b1;
     assign HRESP  = 1'b0;
@@ -72,11 +73,11 @@ module mfp_ahb_ram_slave
 
     `else
 
-    reg [3:0] mask;
+    reg [3:0] mask, mask_dly;
 
     always @*
     begin
-        if (! (HTRANS_dly != `HTRANS_IDLE && HSEL_dly && HWRITE_dly))
+        if (! (HTRANS != `HTRANS_IDLE && HSEL && HWRITE))
             mask = 4'b0000;
         else if (HBURST == `HBURST_SINGLE && HSIZE == `HSIZE_1)
             mask = 4'b0001 << HADDR [1:0];
@@ -84,6 +85,14 @@ module mfp_ahb_ram_slave
             mask = HADDR [1] ? 4'b1100 : 4'b0011;
         else
             mask = 4'b1111;
+    end
+
+    always @ (posedge HCLK)
+    begin
+        if (! HRESETn)
+            mask_dly <= 4'b0;
+        else
+            mask_dly <= mask;
     end
 
     generate
@@ -102,7 +111,7 @@ module mfp_ahb_ram_slave
                 .read_addr    ( HADDR     [ ADDR_WIDTH - 1 + 2 : 2] ),
                 .write_addr   ( HADDR_dly [ ADDR_WIDTH - 1 + 2 : 2] ),
                 .write_data   ( HWDATA    [ i * 8 +: 8 ]            ),
-                .write_enable ( mask      [ i ]                     ),
+                .write_enable ( mask_dly  [ i ]                     ),
                 .read_data    ( HRDATA    [ i * 8 +: 8 ]            )
             );
         end
