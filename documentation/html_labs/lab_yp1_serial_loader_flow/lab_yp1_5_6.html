@@ -106,6 +106,17 @@ type program.rec &gt;\\.\COM%a%
 <p>For Linux the script is different, but also very simple and uses the standard commands.
 The user who runs this script should be included in Linux <i>dialout</i> group</p>
 
+<p>If uploading program to the board first time during the current Linux
+session, add the current user to <i>dialout</i> Linux group. Enter the
+<i>root</i> password when prompted:</p>
+
+<blockquote><pre>
+sudo adduser $USER dialout
+su - $USER
+</pre></blockquote>
+
+<p>Now run the following script that uploads the program into the synthesized MIPSfpga system on FPGA board:</p>
+
 <blockquote><p>File <i>12_upload_to_the_board_using_uart.sh</i></p><pre>             
 stty -F /dev/ttyUSB0 raw speed 115200 -crtscts cs8 -parenb -cstopb
 cat program.rec > /dev/ttyUSB0

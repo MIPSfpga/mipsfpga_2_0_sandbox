@@ -1,2 +1,0 @@
-mfp_ahb_lite_matrix_config.vh:`define MFP_DEMO_INTERRUPTS
-mfp_system.v:`ifdef MFP_DEMO_INTERRUPTS
