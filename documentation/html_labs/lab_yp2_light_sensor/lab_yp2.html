@@ -1,6 +1,9 @@
 <html>
 <head>
-<title>MIPSfpga 2.0. Lab YP2 - Integrating a peripheral: light sensor example</title>
+
+<title>
+MIPSfpga 2.0. Lab YP2 - Integrating a peripheral: light sensor example
+</title>
 
 <style>
 
@@ -19,26 +22,43 @@ pre
 </style>
 </head>
 <body>
-<p><big><big><b>MIPSfpga 2.0. Lab YP2 - The first glance into pipelining</b></big></big></p>
+
+<p><big><big><b>
+MIPSfpga 2.0. Lab YP2 - Integrating a peripheral: light sensor example
+</b></big></big></p>
 <p><big><b>1.  Introduction</b></big></p>
 
-<p>In this lab a student directly observes pipeline forwarding in action.
-The pipeline forwarding, or bypassing, is one of the most important
-microarchitectural tricks in CPU design.  During the lab, a student connects
-bypass control signals of MIPSfpga CPU core to LED signals on FPGA board,
-and watches with his eyes the pattern of flashing LEDs, when running
-different assembly programs on the synthesized MIPSfpga system configured
-inside the FPGA.  Obviously, in order to see anything meaningful with this
-way of observation, the design uses a really slow clock, 0.75 Hz, less than
-a beat per second.</p>
+<p>In this lab a student reviews and synthesizes a configuration of MIPSfpga
+system that contains a peripheral - Digilent Pmod ALS, the Ambient Light
+Sensor. In order to integrate a new peripheral into MIPSfpga system, a
+designer has to do three main steps:</p>
 
-<p>The method used in this lab is not a substitute for traditional debug,
-trace and performance measuring methods used to evaluate microarchitectural
-features by an experienced CPU designer.  This lab is intended for a
-beginning student who wants to visualize the work of the pipeline in a most
-straightforward fashion, without using too much imagination.  The subsequent
-labs in MIPSfpga 2.0 package use more complicated and indirect, but more
-generally applicable methods to explore the pipelining.</p>
+<ol>
+
+<li>Design a Verilog module that handles the external protocol used to
+communicate to the peripheral. The protocol used in this lab is Serial
+Peripheral Interface (SPI).</li>
+
+<li>Create glue logic used to interface the above module with AHB-Lite,
+on-chip bus fabric, used in MIPSfpga system.</li>
+
+<li>Write software support that allows the application program running on
+MIPS microAptiv UP core inside MIPSfpga system to drive the peripheral using
+the memory-mapped input/output registers.</li>
+
+</ol>
+
+<p>By going through this lab, a student also understands the fundamental
+difference between on-chip buses (AHB, AXI, OCP) and inter-chip buses (SPI,
+UART, I<sup>2</sup>C), as well as the difference between serial buses (SPI
+bus used to communicate with the sensor is a kind if serial bus) and
+parallel buses (AHB-Lite used in MIPSfpga SoC is a kind of parallel
+bus).</p>
+
+<p>The result of the light intensity, measured in this lab, is displayed on
+multiple-digit seven-segment display. By combining a sensor, a system
+controller and an output device (the display), the student constructs a
+practically useful gadget, the light meter.</p>
 <p><big><b>2.  The theory of operation</b></big></p>
 
 <p>Pipelining is a technique to improve the throughput of a digital design
@@ -600,6 +620,7 @@ in the table below:</p>
 <tr><td>Terasic DE0-Nano</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE1</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE2-115</td><td>Button/Key 0</td></tr>
+<tr><td>Terasic DE10-Lite</td><td>Button/Key 0</td></tr>
 </table></p>
 
 </li>
