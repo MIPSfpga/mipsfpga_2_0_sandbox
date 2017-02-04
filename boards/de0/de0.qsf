@@ -561,7 +561,7 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to UART_RTS
 
 set_global_assignment -name VERILOG_FILE ../de0.v
 
-source ../de_common/quartus_add_core_and_system_verilog_files.tcl
+source ../../de_common/quartus_add_core_and_system_verilog_files.tcl
 
 #set_global_assignment -name CDF_FILE de0.cdf
 set_global_assignment -name SDC_FILE de0.sdc

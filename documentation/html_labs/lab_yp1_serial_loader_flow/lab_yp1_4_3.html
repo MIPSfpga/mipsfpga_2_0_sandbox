@@ -53,7 +53,24 @@ copy *.qsf project
 copy *.sdc project
 </pre></blockquote>
 
-<p><big><b>4.3.3. The sequence of steps</b></big></p>
+<p><big><b>4.3.4.  Modifying paths in
+<i>boards/de_common/quartus_add_core_and_system_verilog_files.tcl</i></b></big></p>
+
+<p>In some setups of MIPSfpga packages, the directories with the system RTL
+and core RTL Verilog files may have different locations relative to the
+<i>board</i> directory.  If this is the case with your setup, you may need
+to review and possibly modify the following assignments inside
+<i>boards/de_common/quartus_add_core_and_system_verilog_files.tcl</i> file. 
+This file is sourced by <i>de0_cv.qsf</i> TCL script used by Altera Quartus
+II for the project:</p>
+
+<blockquote><p>A fragment of <i>boards/de_common/quartus_add_core_and_system_verilog_files.tcl</i>
+script file</p><pre>               
+set CORE_RTL_PATH   ../../../core_rtl
+set SYSTEM_RTL_PATH ../../../system_rtl
+</pre></blockquote>
+
+<p><big><b>4.3.5. The sequence of steps</b></big></p>
 
 <p><center><b><font color=blue>Picture 4.3.2. Start Altera Quartus II software</font></b></center></p>
 
