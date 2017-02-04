@@ -1,120 +1,208 @@
 <p><big><b>2.  The theory of operation</b></big></p>
 
-<p>Pipelining is a technique to improve the throughput of a digital design
-by splitting the data processing into stages and moving the items to be
-processed through those stages, starting new items before finishing old
-items.  The process works just like an assembly line in a car factory: while
-each individual car takes a long time to assemble, the assembly line as a
-whole produces a new car every few minutes.</p>
-
-<p><b><font color=blue>Figure 1</font></b> show the application of the
-pipelining principle to CPU design, using as an example the classic
-five-stage pipeline utilized in early implementations of MIPS architecture
-back in 1980s.  The items to be processed are the CPU instructions, and the
-stages include: fetching the instruction from the instruction memory;
-decoding the instruction; reading the values of the applicable registers
-(visible to the software, they are called <i>the architecture
-registers</i>); performing arithmetic and data memory operations; and
-finally, writing the results back to the architecture register file.</p>
+<p><b><font color=blue>Figure 1</font></b> shows the sensor used in this
+lab, Digilent PmodALS - Ambient Light Sensor. You can order this sensor from
+website <a
+href="http://store.digilentinc.com/pmod-als-ambient-light-sensor/">
+http://store.digilentinc.com/pmod-als-ambient-light-sensor</a> for
+$9.99.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 1. An illustration of the idea of pipelining
-from the slides that accompany book <i>Digital Design and Computer
-Architecture by David Harris and Sarah Harris, 2012</i> (later referred as
-<i>DDCA</i>).</font></b></p>
+<p><b><font color=blue>Figure 1. <a
+href="http://store.digilentinc.com/pmod-als-ambient-light-sensor/">Digilent
+PmodALS - Ambient Light Sensor</a></font></b></p>
 
-<p><img width=500
-src="http://www.silicon-russia.com/wp-content/uploads/2016/11/classic_mips_pipeline_3.png"></p>
+<p><a
+href="http://store.digilentinc.com/pmod-als-ambient-light-sensor/"><img
+src="http://www.silicon-russia.com/wp-content/uploads/2015/10/mipsfpga_setup_on_de0_cv_for_seminars_in_russia_20151018_121450.jpg"
+width="500" /></a></p>
 
 </center>
 
-<p><b><font color=blue>Figure 2</font></b> illustrates how a sequence of
-MIPS instructions progresses through the classic MIPS pipeline.</p>
+<p>The sensor communicates with other devices using a protocol called Serial
+Peripheral Interface (SPI). This protocol is called serial because it
+transmits bits sequentially using few pins. The serial protocols are
+convenient to connect connect chips on a printed circuit boards, because the
+number of available pins coming out of a typical chip is limited.</p>
+
+<p><b><font color=blue>Figure 2</font></b> illustrates how the information
+is transmitted using SPI protocol. You can get more information about the
+mechanics of SPI protocol from an article on Digilent web site at <a
+href="https://reference.digilentinc.com/pmod:communication_protocols:spi">
+https://reference.digilentinc.com/pmod:communication_protocols:spi</a>.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 2. An illustration that shows how a sequence
-of MIPS instructions progresses through the classic MIPS pipeline. From
-<i>DDCA</i>.</font></b></p>
+<p><b><font color=blue>Figure 2. <a
+href="https://reference.digilentinc.com/pmod:communication_protocols:spi">SPI
+protocol</a> illustration from <a href="http://digilentinc.com">Digilent</a>
+website</a></font></b></p>
 
-<p><img width=500
-src="http://www.silicon-russia.com/wp-content/uploads/2016/11/classic_mips_pipeline_2.png"></p>
+<a
+href="https://reference.digilentinc.com/pmod:communication_protocols:spi"><img
+src="http://www.silicon-russia.com/wp-content/uploads/2016/11/spi_signals.png"
+width="500" /></a>
 
 </center>
 
-<p><b><font color=blue>Figure 3</font></b> shows the difference between a
-single-cycle, non-pipelined microarchitectural implementation of MIPS
-architecture and its classic pipelined implementation. Notice the added
-flip-flops, non-architectural registers, invisible for the software
-engineer.</p>
+<p>The specific variant of SPI protocol used by the light sensor is
+described in sensor documentation that can be downloaded from <a
+href="https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf">https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf</a>.
+The exerpt from that documentation is on <b><font color=blue>Figure
+3</font></b>.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 3. The difference between a single-cycle,
-non-pipelined microarchitectural implementation of MIPS architecture and its
-classic pipelined implementation.</font></b></p>
+<p><b><font color=blue>Figure 3. The description of a version of SPI
+protocol used in Digilent PmodALS - Ambient Light Sensor from <a
+href="https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf">https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf</a>
+</font></b></p>
 
-<p><img width=500
-src="http://www.silicon-russia.com/wp-content/uploads/2016/11/classic_mips_pipeline.png"></p>
+<a
+href="https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf">
+
+<p><img
+src="http://www.silicon-russia.com/wp-content/uploads/2015/12/Screenshot-2015-12-30-22.44.55.png"
+width="500" /> </p>
+
+<p><img
+src="http://www.silicon-russia.com/wp-content/uploads/2015/12/Screenshot-2015-12-30-22.45.24.png"
+width="500" /></p>
+
+</a>
 
 </center>
 
-<p>A fundamental problem with the straightforward pipelined implementation
-is the presence of so-called data hazards. Such hazards occur when an
-instruction uses data that are supposed to be generated by one of the
-previous instructions, and this data is not yet written into the
-architectural register (architectural register is a register visible to
-software).</p>
-
-<p>There are several methods used to resolve data pipeline hazards. One
-method is to simply add empty (<i>nop</i>) instructions to the software.
-Another method is to add so-called stalls to the hardware, which forces an
-instruction to wait for the previous instruction to complete before using
-its result. Both methods result in slowing down the program execution.
-However there is another method, called pipeline forwarding, or, more
-specifically, bypassing that involves forwarding the calculated data from an
-earlier instruction to the instruction which uses the earlier instruction's
-result even before the data gets written into the applicable architectural
-register. This method is illustrated in <b><font color=blue>Figure
-4</font></b> and the applicable schematic is shown on <b><font
-color=blue>Figure 5</font></b>.</p>
+<p>SPI is not the only serial protocol that can be used to communicate with
+sensors, actuators and other computers. <b><font color=blue>Figure
+4</font></b> contains a table that compares three most popular serial
+protocols used for simple point-to-point connections in embedded systems:
+SPI, UART and I<sup>2</sup>C.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 4. A sequence of MIPS instructions progressing
-through the classic MIPS pipeline when the forwarding is present. From
-<i>DDCA</i>.</font></b></p>
+<p><b><font color=blue>Figure 4. Serial protocol comparison table from a
+book <a
+href="https://www.amazon.com/Programming-32-bit-Microcontrollers-Exploring-Technology/dp/0750687096">
+Programming 32-bit Microcontrollers in C: Exploring the PIC32 by Lucio Di
+Jasio</a></font></b></p>
 
-<p><img width=500
-src="http://www.silicon-russia.com/wp-content/uploads/2016/11/classic_mips_forwarding.png"></p>
+<a
+href="https://www.amazon.com/Programming-32-bit-Microcontrollers-Exploring-Technology/dp/0750687096">
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2017/02/Screenshot-2017-01-31-21.48.11.png"
+width="500" /></a>
+
+</center>
+
+<p>Blocks inside systems on chips (SoCs) use different protocols to
+communicate with each other, including:</p>
+
+<ul>
+
+<li>Advanced Microcontroller Bus Architecture (AMBA) Advanced eXtensible
+Interface (AXI)</li>
+
+<li>AMBA Advanced High-performance Bus (AHB)</li>
+
+<li>Open Core Protocol (OCP)</li>
+
+<li>Processor Local Bus (PLB)</li>
+
+<li>Wishbone Bus and others</li>
+
+</ul>
+
+<p>These protocols are parallel - they transmit multiple bits of information
+in one clock cycle, using multiple wires. Minimizing the number of wires for
+connectons inside a typical chip is not a critical task, more important is
+maximizing the amount of information transmitted per clock cycle.</p>
+
+<p>In addition, synchronizing signals on multiple parallel wires inside the
+chip is much easier than outside. Outside the chip, noise and different wire
+length can be the issues. Because of it, the on-chip buses tend to be
+parallel, while off-chip protocols are frequently serial.</p>
+
+<p>MIPS microAptiv UP core inside MIPSfpga SoC uses a protocol called
+AHB-Lite, a simplified variant of AHB, that assumes one master device and
+multiple slave devices in one system (full AHB allows multiple masters).
+<b><font color=blue>Figure 5</font></b> shows the general structure of
+MIPSfpga system based on AHB-Lite interconnect. The protocol is documented
+in <i>MIPS32&reg; microAptiv&trade; UP Processor Core AHB-Lite Interface</i>
+manual included into MIPSfpga package.</p>
+
+<center>
+
+<p><b><font color=blue>Figure 5. AHB-Lite interconnect in MIPSfpga
+system</font></b></p>
+
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2016/11/ahb_lite_in_mipsfpga.png"
+width="500" />
+
+</center>
+
+<p>AHB-Lite transactions include single and burst variants of reads and
+writes. Address and data in those transactions are pipelined, which means
+that the address on a new transaction can be transmitted simultaneously with
+data for the previous transaction, as show on <b><font color=blue>Figure
+6</font></b> for single reads and <b><font color=blue>Figure 7</font></b>
+for single writes.</p>
+
+<center>
+
+<p><b><font color=blue>Figure 6. A waveform of a single AHB-Lite read
+transaction from <a
+href="http://mazsola.iit.uni-miskolc.hu/~drdani/docs_arm/IHI0033A_AMBA3_AHB_Lite.pdf">AHB-Lite
+specification</a></font></b></p>
+
+<a
+href="http://mazsola.iit.uni-miskolc.hu/~drdani/docs_arm/IHI0033A_AMBA3_AHB_Lite.pdf">
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2016/11/ahb_lite_read.png"
+width="500" /> </a>
 
 </center>
 
 <center>
 
-<p><b><font color=blue>Figure 5. The additional logic needed for the classic
-MIPS pipeline to support pipeline forwarding / bypasses. From
-<i>DDCA</i>.</font></b></p>
+<p><b><font color=blue>Figure 7. A waveform of a single AHB-Lite write
+transaction from <a
+href="http://mazsola.iit.uni-miskolc.hu/~drdani/docs_arm/IHI0033A_AMBA3_AHB_Lite.pdf">AHB-Lite
+specification</a> </font></b></p>
 
-<p><img width=500
-src="http://www.silicon-russia.com/wp-content/uploads/2016/11/classic_mips_forwarding_2.png"></p>
+<a
+href="http://mazsola.iit.uni-miskolc.hu/~drdani/docs_arm/IHI0033A_AMBA3_AHB_Lite.pdf">
+<img
+src="http://www.silicon-russia.com/wp-content/uploads/2016/11/ahb_lite_write.png"
+width="500" /> </a>
 
 </center>
 
-<p>The pipeline in the <i>MIPS microAptiv UP</i> core, which is used in
-MIPSfpga, is similar to, but not the same as, the classic MIPS pipeline. The
-difference is due to the fact that the pipeline of MIPSfpga core is somewhat
-better balanced to achieve higher clock frequency. As a result, bypass
-signals in MIPSfpga are different, as shown on <b><font color=blue>Figure
-6</font></b>.</p>
+<center>
+
+<p><b><font color=blue>Figure 8. MIPSfpga module hierarchy, including the
+light sensor module, for <a
+href="http://store.digilentinc.com/nexys-4-ddr-artix-7-fpga-trainer-board-recommended-for-ece-curriculum/">Digilent
+Nexys4 DDR board</a> that carries Xilinx Artix-7 FPGA</font></b></p>
+
+<a
+href="http://store.digilentinc.com/nexys-4-ddr-artix-7-fpga-trainer-board-recommended-for-ece-curriculum/"><img
+width=500
+src="http://silicon-russia.com/pages/2015_12_28/hierarchy_nexys4_ddr_full.png"
+/></a>
+
+</center>
 
 <center>
 
-<p><b><font color=blue>Figure 6. Pipeline bypass signals in <i>MIPS
-microAptiv UP</i> core used in MIPSfpga.</font></b></p>
+<p><b><font color=blue>Figure 9. MIPSfpga module hierarchy, including the
+light sensor module, for <a href="http://de0-cv.terasic.com">Terasic
+DE0-CVboard</a> that carries Altera Cyclon V FPGA</font></b></p>
 
-<p><img width=500
-src="http://www.silicon-russia.com/wp-content/uploads/2016/10/mips_m14kc_bypass_from_sum_no_title.png"></p>
+<a href="http://de0-cv.terasic.com"><img width=500
+src="http://silicon-russia.com/pages/2015_12_28/hierarchy_de0_cv_full.png"
+/></a>
 
 </center>
