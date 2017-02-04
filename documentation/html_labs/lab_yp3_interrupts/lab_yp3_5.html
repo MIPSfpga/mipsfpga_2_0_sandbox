@@ -401,3 +401,14 @@ instructions which are not going to graduate because of the interrupt.</p>
 
 <p>If you need more information about CPU pipelining in MIPSfpga, you can
 review <i>MIPSfpga 2.0.  Lab YP5 - The first glance into pipelining</i>.</p>
+
+<p><big><b>5.6 Reimplement the light sensor lab making it
+interrupt-driven</b></big></p>
+
+<p>After going through this lab, go back to the light sensor lab <i>MIPSfpga
+2.0.  Lab YP2 - Integrating a peripheral: the light sensor example</i>) and
+re-implement it using interrupt-driven approach.  Modify the light sensor
+interfacing module so it issues an interrupt when the measured value
+changes.  Connect the interrupt pin to <i>SI_Int</i> signal of MIPS
+microAptive UP core.  Measure the system performance improvement that comes
+from offloading input-output to the interrupt service routine.</p>

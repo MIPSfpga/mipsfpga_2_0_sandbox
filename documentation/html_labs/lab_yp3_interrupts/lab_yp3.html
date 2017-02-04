@@ -37,6 +37,12 @@ explore MIPS CPU features related to the interrupts.  Another group of
 follow-up exercises can link the interrupts to software parallelism and
 context switching in operating systems.  A number of recommended follow-up
 exercises are listed at the end of this lab.</p>
+
+<p>This lab can be also combined with the previous lab, <i>MIPSfpga 2.0. 
+Lab YP2 - Integrating a peripheral: the light sensor example</i>, to create
+a student project that demonstrates the interrupt-driven approach to
+input/output, and compares this approach to polling I/O ports without using
+interrupts.</p>
 <p><big><b>2.  The theory of operation</b></big></p>
 
 <p>Interrupt is one of the key concepts in computer programming and system
@@ -909,6 +915,17 @@ instructions which are not going to graduate because of the interrupt.</p>
 
 <p>If you need more information about CPU pipelining in MIPSfpga, you can
 review <i>MIPSfpga 2.0.  Lab YP5 - The first glance into pipelining</i>.</p>
+
+<p><big><b>5.6 Reimplement the light sensor lab making it
+interrupt-driven</b></big></p>
+
+<p>After going through this lab, go back to the light sensor lab <i>MIPSfpga
+2.0.  Lab YP2 - Integrating a peripheral: the light sensor example</i>) and
+re-implement it using interrupt-driven approach.  Modify the light sensor
+interfacing module so it issues an interrupt when the measured value
+changes.  Connect the interrupt pin to <i>SI_Int</i> signal of MIPS
+microAptive UP core.  Measure the system performance improvement that comes
+from offloading input-output to the interrupt service routine.</p>
 <p><big><b>Appendix A.  A list of recommended materials to review before and
 during the interrupt lab</b></big></p>
 
@@ -1002,7 +1019,7 @@ are handled by a single mechanism.  What sort of events are they?</p>
 <ul>
 
 <li><p><i>External events</i>: Some event outside the CPU core—that is, from
-some real “wire” input signal.  These are interrupts.  (Note: There are some
+some real "wire" input signal.  These are interrupts.  (Note: There are some
 more obscure noninterrupt external events like bus errors reported on a
 read—for now, just assume that they are a special sort of interrupt). 
 Interrupts are used to direct the attention of the CPU to some external
@@ -1085,7 +1102,7 @@ point, and everything else is up to software.</li>
 
 <p>The return of control to the exception victim and the change (if
 required) back from kernel to a lower-privilege level must be done at the
-same time (“atomically,” in the jargon of computer science).  It would be a
+same time ("atomically," in the jargon of computer science).  It would be a
 security hole if you ran even one instruction of application code at
 kernel-privilege level; on the other hand, the attempt to run a kernel
 instruction with user privileges would lead to a fatal exception.</p>
@@ -1139,14 +1156,14 @@ the <b>Cause</b> register.  Note that these are exactly that—current
 levels—and do not necessarily correspond to the signal pattern that caused
 the interrupt exception in the first place.  The active input levels in
 <b>Cause(IP)</b> and the masks in <b>SR(IM)</b> are helpfully aligned to the
-same bit positions, in case you want to “and” them together.  The software
+same bit positions, in case you want to "and" them together.  The software
 interrupts are at the lowest positions, and the hardware interrupts are
 arranged in increasing order.</p>
 
 <p>In architectural terms, all interrupts are equal.  (Note: That's not
-quite true in vectored interrupt and “EIC mode,” described in section 5.8.5,
+quite true in vectored interrupt and "EIC mode," described in section 5.8.5,
 but they're not widely used).  When an interrupt exception is taken, an
-older CPU uses the “general” exception entry point—though MIPS 32/64 CPUs
+older CPU uses the "general" exception entry point—though MIPS 32/64 CPUs
 and some other modern CPUs offer an optional distinct exception entry point
 reserved for interrupts, which can save a few cycles.  You can select this
 with the <b>Cause(IV)</b> register bit.</p>
@@ -1158,7 +1175,7 @@ which device is signaling us.  Here is the usual sequence:</p>
 
 <ul>
 
-<li><p>Consult the <b>Cause</b> register IP field and logically “and” it
+<li><p>Consult the <b>Cause</b> register IP field and logically "and" it
 with the current interrupt masks in <b>SR(IM)</b> to obtain a bit map of
 active, enabled interrupt requests.  There may be more than one, any of
 which would have caused the interrupt.</p></li>
@@ -1202,8 +1219,8 @@ sequence.</p></li>
 </ul>
 
 <p>When making changes to <b>SR</b>, you need to be careful about changes
-whose effect is delayed due to the operation of the pipeline — “CP0
-hazards.” See section 3.4 for more details and how to program around the
+whose effect is delayed due to the operation of the pipeline — "CP0
+hazards." See section 3.4 for more details and how to program around the
 hazards.</p>
 
 </blockquote>

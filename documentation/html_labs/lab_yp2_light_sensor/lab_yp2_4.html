@@ -6,12 +6,13 @@ Instead of constantly polling memory-mapped input-output registers, the
 software performs more important tasks, and input-output happens only when
 the peripheral device sends an interrupt request.</p>
 
-<p>After going throuh the next lab (<i>MIPSfpga 2.0. Lab YP3 - Introducing
+<p>After going through the next lab (<i>MIPSfpga 2.0.  Lab YP3 - Introducing
 interrupts</i>), come back to this lab and modify the light sensor
-interfacing module. The modified module should issue an interrupt when the
-measured value changes. Connect the interrupt pin to <i>SI_Int</i> signal of
-MIPS microAptive UP core. Measure the system performance improvement that
-comes from offloading input-output to the interrupt service routine.</p>
+interfacing module.  The modified module should issue an interrupt when the
+measured value changes.  Connect the interrupt pin to <i>SI_Int</i> signal
+of MIPS microAptive UP core.  Measure the system performance improvement
+that comes from offloading input-output to the interrupt service
+routine.</p>
 
 <p>You can use the light sensor lab and the interrupt lab as examples to
 develop multiple projects, integrating sensors and actuators into MIPSfpga
