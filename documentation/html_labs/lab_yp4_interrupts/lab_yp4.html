@@ -251,7 +251,8 @@ on FPGA board.</p>
 <p>The output value is constructed from both high and low bits of the
 counter.  This allows the student to observe the digits on the display
 changing when running the synthesized system with either fast clock (50 MHz)
-and ultra-slow clock (0.75 Hz or 12.5 Hz).</p>
+and ultra-slow clock (0.75 Hz or 12.5 Hz).  For more details about the
+switchable clock see <i>MIPSfpga 2.0 Lab YP2.  Switchable Clock</i>.</p>
 
 <p>Depending on the position of a switch 2, the program can either run with
 or without interrupts.  In both cases it resets the counter to predefined
@@ -530,12 +531,13 @@ signals on the waveform.</p>
 counter (PC) to the outside seven-segment display</b></p>
 
 <p>Create a variant of the interrupt lab that connects the processor's
-program counter (PC) to the outside multiple-digit seven-segment display.
+program counter (PC) to the outside multiple-digit seven-segment display. 
 This connection should be muxed with the regular seven-segment display
 output and should be dependent on whether some selected switch or button is
-pressed. With this setup, when the system clock is turned into slow mode, it
-will be possible to observe how the processor enters interrupt service
-routune.</p>
+pressed.  With this setup, when the system clock is turned into slow mode,
+it will be possible to observe how the processor enters interrupt service
+routune.  For more details about the switchable clock see <i>MIPSfpga 2.0
+Lab YP2.  Switchable Clock</i>.</p>
 
 <p><b>5.1.3 Student investigation: Which Coprocessor 0 register bits should
 be exposed to outside LEDs to observe interrupts in action in slow-clock
