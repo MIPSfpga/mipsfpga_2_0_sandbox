@@ -228,14 +228,14 @@ synthesized MIPSfpga system</b></big></p>
 <p>Under Windows:</p>
 
 <blockquote><pre>
-cd programs\lab_yp4
+cd programs\04_interrupts
 00_clean_all.bat
 </pre></blockquote>
 
 <p>Under Linux:</p>
 
 <blockquote><pre>
-cd programs/lab_yp4
+cd programs/04_interrupts
 ./00_clean_all.sh
 </pre></blockquote>
 
@@ -243,7 +243,7 @@ cd programs/lab_yp4
 use interrupts</b></big></p>
 
 <p>The <i>main()</i> function is located in file
-<i>programs/03_interrupts/main.c</i>.  This function is executed after the
+<i>programs/04_interrupts/main.c</i>.  This function is executed after the
 reset and running the boot sequence.  The main function in this lab simply
 runs a counter and outputs its value on a multi-digit seven-segment display
 on FPGA board.</p>
@@ -278,7 +278,7 @@ memory of the synthesized MIPSfpga-based system on the board.</p>
 
 <ol>
 
-<li>cd programs\lab_yp4</li>
+<li>cd programs\04_interrupts</li>
 
 <li>run 02_compile_and_link.bat</li>
 
@@ -315,7 +315,7 @@ su - $USER
 
 <ol>
 
-<li>cd programs/lab_yp4</li>
+<li>cd programs/04_interrupts</li>
 
 <li>run ./02_compile_and_link.sh</li>
 
@@ -419,28 +419,28 @@ and microMIPS32&trade; Privileged Resource Architecture</i></li>
 <p><big><b>3.15.  Review the portion of the lab program code that uses
 interrupts</b></big></p>
 
-<p>The interrupt handler in <i>programs/03_interrupts/main.c</i>:</p>
+<p>The interrupt handler in <i>programs/04_interrupts/main.c</i>:</p>
 
 <img width=500
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.17.21.png"
 />
 
 <p>Setting up the Coprocessor 0 registers for handling the interrupts in
-<i>programs/03_interrupts/main.c</i>:</p>
+<i>programs/04_interrupts/main.c</i>:</p>
 
 <img width=500
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.18.51.png"
 />
 
 <p>Code to setup the exception vector in
-<i>programs/03_interrupts/exceptions.S</i>:</p>
+<i>programs/04_interrupts/exceptions.S</i>:</p>
 
 <img width=500
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.27.09.png"
 />
 
 <p>The linker script which includes a new section for the exception vector
-in <i>programs/03_interrupts/program.ld</i>:</p>
+in <i>programs/04_interrupts/program.ld</i>:</p>
 
 <img
 src="http://www.silicon-russia.com/wp-content/uploads/2017/01/Screenshot-2017-01-15-20.31.16.png"
@@ -463,14 +463,14 @@ picture on how everything works.</p>
 <p>Under Windows:</p>
 
 <blockquote><pre>
-cd programs\lab_yp4
+cd programs\04_interrupts
 04_disassemble.bat
 </pre></blockquote>
 
 <p>Under Linux:</p>
 
 <blockquote><pre>
-cd programs/lab_yp4
+cd programs/04_interrupts
 ./04_disassemble.sh
 </pre></blockquote>
 
@@ -481,7 +481,7 @@ current directory.</p>
 code</b></big></p>
 
 <p>Analyze the following sections of
-<i>programs/03_interrupts/program.dis</i> file:</p>
+<i>programs/04_interrupts/program.dis</i> file:</p>
 
 <p>The code for the interrupt vector:</p>
 

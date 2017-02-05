@@ -8,11 +8,556 @@ BusBlaster board and OpenOCD software</i>.  Such generic steps are not
 described in this section.  Only the steps different from <i>Lab YP1</i> are
 explained in details.</p>
 
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>mfp_ahb_lite_matrix_config.vh</i></p><pre>
+
+//
+//  Configuration parameters
+//
+
+// `define MFP_USE_WORD_MEMORY
+// `define MFP_INITIALIZE_MEMORY_FROM_TXT_FILE
+`define MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
+`define MFP_USE_UART_PROGRAM_LOADER
+// `define MFP_DEMO_LIGHT_SENSOR
+// `define MFP_DEMO_INTERRUPTS
+// `define MFP_DEMO_CACHE_MISSES
+// `define MFP_DEMO_PIPE_BYPASS
+
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>nexys4_ddr.v</i></p><pre>
+`include "mfp_ahb_lite_matrix_config.vh"
+
+module nexys4_ddr
+(
+    input         CLK100MHZ,
+    input         CPU_RESETN,
+
+    . . . . . . . . . . . . . . . . . . . .
+
+    input  [15:0] SW, 
+
+    . . . . . . . . . . . . . . . . . . . .
+);
+
+    wire clk;
+
+    `ifdef MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
+
+    wire       muxed_clk;
+    wire [1:0] sw_db;
+
+    mfp_multi_switch_or_button_sync_and_debouncer
+    # (.WIDTH (2))
+    mfp_multi_switch_or_button_sync_and_debouncer
+    (   
+        .clk    ( CLK100MHZ ),
+        .sw_in  ( SW [1:0]  ),
+        .sw_out ( sw_db     )
+    );
+
+    mfp_clock_divider_100_MHz_to_25_MHz_12_Hz_0_75_Hz 
+    mfp_clock_divider_100_MHz_to_25_MHz_12_Hz_0_75_Hz
+    (
+        .clki    ( CLK100MHZ ),
+        .sel_lo  ( sw_db [0] ),
+        .sel_mid ( sw_db [1] ),
+        .clko    ( muxed_clk )
+    );
+
+    BUFG BUFG_slow_clk (.O ( clk ), .I ( muxed_clk ));
+
+    `else
+
+    clk_wiz_0 clk_wiz_0 (.clk_in1 (CLK100MHZ), .clk_out1 (clk));
+
+    `endif
+
+    . . . . . . . . . . . . . . . . . . . .
+
+    mfp_system mfp_system
+    (
+        .SI_ClkIn         (   clk           ),
+        .SI_Reset         ( ~ CPU_RESETN    ),
+                          
+        . . . . . . . . . . . . . . . . . .
+    );
+
+    . . . . . . . . . . . . . . . . . . . .
+
+endmodule
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>de0_cv.v</i></p><pre>
+`include "mfp_ahb_lite_matrix_config.vh"
+
+module de0_cv
+(
+    input           CLOCK2_50,
+    input           CLOCK3_50,
+    inout           CLOCK4_50,
+    input           CLOCK_50,
+                   
+    input           RESET_N,
+
+    input   [ 3:0]  KEY,
+    input   [ 9:0]  SW,
+
+    . . . . . . . . . . . . . . . . . . . .
+);
+
+    wire clk;
+
+    `ifdef MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
+
+    wire       muxed_clk;
+    wire [1:0] sw_db;
+
+    mfp_multi_switch_or_button_sync_and_debouncer
+    # (.WIDTH (2))
+    mfp_multi_switch_or_button_sync_and_debouncer
+    (   
+        .clk    ( CLOCK_50 ),
+        .sw_in  ( SW [1:0] ),
+        .sw_out ( sw_db    )
+    );
+
+    mfp_clock_divider_50_MHz_to_25_MHz_12_Hz_0_75_Hz 
+    mfp_clock_divider_50_MHz_to_25_MHz_12_Hz_0_75_Hz
+    (
+        .clki    ( CLOCK_50  ),
+        .sel_lo  ( sw_db [0] ),
+        .sel_mid ( sw_db [1] ),
+        .clko    ( muxed_clk )
+    );
+
+    global gclk
+    (
+        .in     ( muxed_clk  ), 
+        .out    ( clk        )
+    );
+
+    `else
+
+    assign clk = CLOCK_50;
+
+    `endif
+
+    . . . . . . . . . . . . . . . . . . . .
+
+    mfp_system mfp_system
+    (
+        .SI_ClkIn         (   clk             ),
+        .SI_Reset         ( ~ RESET_N         ),
+                          
+        . . . . . . . . . . . . . . . . . .
+    );
+
+    . . . . . . . . . . . . . . . . . . . .
+
+endmodule
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>de0_cv.sdc</i></p><pre>
+#**************************************************************
+# Create Clock
+#**************************************************************
+
+create_clock -period 20 [get_ports CLOCK2_50]
+create_clock -period 20 [get_ports CLOCK3_50]
+create_clock -period 20 [get_ports CLOCK_50]
+create_clock -period 20 [get_ports CLOCK4_50]
+create_clock -period 40 [get_nets mfp_clock_divider_50_MHz_to_25_MHz_12_Hz_0_75_Hz|clko]
+create_clock -period 20 [get_nets de0_cv|clk]
+create_clock -period 20 [get_ports GPIO_1[17]]
+
+. . . . . . . . . . . . . . . . . . . . . .
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>mfp_clock_dividers.v</i></p><pre>
+module mfp_clock_divider
+(
+    input      clki,
+    input      sel_lo,
+    input      sel_mid,
+    output reg clko
+);
+
+    // 50 MHz / 2 ** 26 = 0.75 Hz
+
+    parameter DIV_POW_FASTEST = 1;
+    parameter DIV_POW_SLOWEST = 26;
+
+    reg [DIV_POW_SLOWEST - 1: 0] counter;
+
+    always @ (posedge clki)
+        counter &lt;= counter + 1'b1;
+
+    always @ (posedge clki)
+	clko &lt;= sel_lo  ? counter [DIV_POW_SLOWEST - 1] : 
+                sel_mid ? counter [DIV_POW_SLOWEST - 5] :
+                          counter [DIV_POW_FASTEST - 1] ;
+
+endmodule
+
+//--------------------------------------------------------------------
+
+module mfp_clock_divider_100_MHz_to_25_MHz_12_Hz_0_75_Hz
+(
+    input  clki,
+    input  sel_lo,
+    input  sel_mid,
+    output clko
+);
+
+    mfp_clock_divider # (.DIV_POW_FASTEST (2), .DIV_POW_SLOWEST (27))
+    mfp_clock_divider (clki, sel_lo, sel_mid, clko);
+
+endmodule
+
+//--------------------------------------------------------------------
+
+module mfp_clock_divider_50_MHz_to_25_MHz_12_Hz_0_75_Hz
+(
+    input  clki,
+    input  sel_lo,
+    input  sel_mid,
+    output clko
+);
+
+    mfp_clock_divider # (.DIV_POW_FASTEST (1), .DIV_POW_SLOWEST (26))
+    mfp_clock_divider (clki, sel_lo, sel_mid, clko);
+
+endmodule
+
+. . . . . . . . . . . . . . . . . . . . . .
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>mfp_switch_and_button_debouncers.v</i></p><pre>
+module mfp_switch_or_button_sync_and_debouncer
+# (
+    parameter DEPTH = 8
+)
+(   
+    input      clk,
+    input      sw_in,
+    output reg sw_out
+);
+
+    reg  [ DEPTH - 1 : 0] cnt;
+    reg  [         2 : 0] sync;
+    wire                  sw_in_s;
+
+    assign sw_in_s = sync [2];
+
+    always @ (posedge clk)
+        sync &lt;= { sync [1:0], sw_in };
+
+    always @ (posedge clk)
+        if (sw_out ^ sw_in_s)
+            cnt &lt;= cnt + 1'b1;
+        else
+            cnt &lt;= { DEPTH { 1'b0 } };
+
+    always @ (posedge clk)
+        if (cnt == { DEPTH { 1'b1 } })
+            sw_out &lt;= sw_in_s;
+
+endmodule
+
+//-------------------------------------------------------------------
+
+module mfp_multi_switch_or_button_sync_and_debouncer
+# (
+    parameter WIDTH = 1, DEPTH = 8
+)
+(   
+    input                    clk,
+    input  [ WIDTH - 1 : 0 ] sw_in,
+    output [ WIDTH - 1 : 0 ] sw_out
+);
+
+    genvar sw_cnt;
+
+    generate
+        for (sw_cnt = 0; sw_cnt &lt; WIDTH; sw_cnt = sw_cnt + 1)
+        begin : GEN_DB_B
+           
+           mfp_switch_or_button_sync_and_debouncer
+           # (.DEPTH (8))
+           mfp_switch_or_button_sync_and_debouncer
+           (    
+              .clk    ( clk             ),
+              .sw_in  ( sw_in  [sw_cnt] ),
+              .sw_out ( sw_out [sw_cnt] )
+           );
+
+        end
+    endgenerate 
+
+endmodule
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>mfp_seven_segment_displays.v</i></p><pre>
+. . . . . . . . . . . . . . . . . . . . . .
+
+module mfp_multi_digit_display
+(
+    input             clock,
+    input             resetn,
+    input      [31:0] number,
+
+    output reg [ 6:0] seven_segments,
+    output reg        dot,
+    output reg [ 7:0] anodes
+);
+
+    function [6:0] bcd_to_seg (input [3:0] bcd);
+
+        case (bcd)
+        'h0: bcd_to_seg = 'b1000000;  // a b c d e f g
+        'h1: bcd_to_seg = 'b1111001;
+        'h2: bcd_to_seg = 'b0100100;  //   --a--
+        'h3: bcd_to_seg = 'b0110000;  //  |     |
+        'h4: bcd_to_seg = 'b0011001;  //  f     b
+        'h5: bcd_to_seg = 'b0010010;  //  |     |
+        'h6: bcd_to_seg = 'b0000010;  //   --g--
+        'h7: bcd_to_seg = 'b1111000;  //  |     |
+        'h8: bcd_to_seg = 'b0000000;  //  e     c
+        'h9: bcd_to_seg = 'b0011000;  //  |     |
+        'ha: bcd_to_seg = 'b0001000;  //   --d-- 
+        'hb: bcd_to_seg = 'b0000011;
+        'hc: bcd_to_seg = 'b1000110;
+        'hd: bcd_to_seg = 'b0100001;
+        'he: bcd_to_seg = 'b0000110;
+        'hf: bcd_to_seg = 'b0001110;
+        endcase
+
+    endfunction
+
+    reg [2:0] i;
+
+    always @ (posedge clock or negedge resetn)
+    begin
+        if (! resetn)
+        begin
+            seven_segments &lt;=   bcd_to_seg (0);
+            dot            &lt;= ~ 0;
+            anodes         &lt;= ~ 8'b00000001;
+
+            i &lt;= 0;
+        end
+        else
+        begin
+            seven_segments &lt;=   bcd_to_seg (number [i * 4 +: 4]);
+            dot            &lt;= ~ 0;
+            anodes         &lt;= ~ (1 &lt;&lt; i);
+
+            i &lt;= i + 1;
+        end
+    end
+
+endmodule
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>nexys4_ddr.v</i></p><pre>
+module nexys4_ddr
+(
+    input         CLK100MHZ,
+    input         CPU_RESETN,
+
+    . . . . . . . . . . . . . . . . . . . .
+
+    input  [15:0] SW, 
+
+    . . . . . . . . . . . . . . . . . . . .
+
+    output        CA,
+    output        CB,
+    output        CC,
+    output        CD,
+    output        CE,
+    output        CF,
+    output        CG,
+    output        DP,
+
+    output [ 7:0] AN,
+
+    . . . . . . . . . . . . . . . . . . . .
+);
+    . . . . . . . . . . . . . . . . . . . .
+
+    wire [`MFP_7_SEGMENT_HEX_WIDTH - 1:0] IO_7_SegmentHEX;
+
+    . . . . . . . . . . . . . . . . . . . .
+
+    wire display_clock;
+
+    mfp_clock_divider_100_MHz_to_763_Hz mfp_clock_divider_100_MHz_to_763_Hz
+        (CLK100MHZ, display_clock);
+
+    mfp_multi_digit_display multi_digit_display
+    (
+        .clock          ( display_clock                  ),
+        .resetn         ( CPU_RESETN                     ),
+        .number         ( IO_7_SegmentHEX                ),
+
+        .seven_segments ( { CG, CF, CE, CD, CC, CB, CA } ),
+        .dot            ( DP                             ),
+        .anodes         ( AN                             )
+    );
+
+endmodule
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>mfp_seven_segment_displays.v</i></p><pre>
+module mfp_single_digit_seven_segment_display
+(
+    input      [3:0] digit,
+    output reg [6:0] seven_segments
+);
+
+    always @*
+        case (digit)
+        'h0: seven_segments = 'b1000000;  // a b c d e f g
+        'h1: seven_segments = 'b1111001;
+        'h2: seven_segments = 'b0100100;  //   --a--
+        'h3: seven_segments = 'b0110000;  //  |     |
+        'h4: seven_segments = 'b0011001;  //  f     b
+        'h5: seven_segments = 'b0010010;  //  |     |
+        'h6: seven_segments = 'b0000010;  //   --g--
+        'h7: seven_segments = 'b1111000;  //  |     |
+        'h8: seven_segments = 'b0000000;  //  e     c
+        'h9: seven_segments = 'b0011000;  //  |     |
+        'ha: seven_segments = 'b0001000;  //   --d-- 
+        'hb: seven_segments = 'b0000011;
+        'hc: seven_segments = 'b1000110;
+        'hd: seven_segments = 'b0100001;
+        'he: seven_segments = 'b0000110;
+        'hf: seven_segments = 'b0001110;
+        endcase
+
+endmodule
+
+. . . . . . . . . . . . . . . . . . . . . .
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>de0_cv.v</i></p><pre>
+`include "mfp_ahb_lite_matrix_config.vh"
+
+module de0_cv
+(
+    . . . . . . . . . . . . . . . . . . . .
+
+    output  [ 6:0]  HEX0,
+    output  [ 6:0]  HEX1,
+    output  [ 6:0]  HEX2,
+    output  [ 6:0]  HEX3,
+    output  [ 6:0]  HEX4,
+    output  [ 6:0]  HEX5,
+
+    . . . . . . . . . . . . . . . . . . . .
+);
+    . . . . . . . . . . . . . . . . . . . .
+
+    wire [`MFP_7_SEGMENT_HEX_WIDTH - 1:0] IO_7_SegmentHEX;
+
+    . . . . . . . . . . . . . . . . . . . .
+
+    mfp_single_digit_seven_segment_display digit_5 ( IO_7_SegmentHEX [23:20] , HEX5 );
+    mfp_single_digit_seven_segment_display digit_4 ( IO_7_SegmentHEX [19:16] , HEX4 );
+    mfp_single_digit_seven_segment_display digit_3 ( IO_7_SegmentHEX [15:12] , HEX3 );
+    mfp_single_digit_seven_segment_display digit_2 ( IO_7_SegmentHEX [11: 8] , HEX2 );
+    mfp_single_digit_seven_segment_display digit_1 ( IO_7_SegmentHEX [ 7: 4] , HEX1 );
+    mfp_single_digit_seven_segment_display digit_0 ( IO_7_SegmentHEX [ 3: 0] , HEX0 );
+
+endmodule
+</pre></blockquote>
+
+<p><b>3.1 Review</b></p>
+
+<blockquote><p>File <i>main.c</i></p><pre>
+#include "mfp_memory_mapped_registers.h"
+
+int main ()
+{
+    int n;
+
+    for (n = 0;; n ++)
+    {
+        MFP_RED_LEDS      = n;
+        MFP_GREEN_LEDS    = n;
+        MFP_7_SEGMENT_HEX = ((n >> 8) & 0xffffff00) | (n & 0xff);
+    }
+
+    return 0;
+}
+</pre></blockquote>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <p><b>3.1 Review</b></p>
 
 <p>Review</p>
 
-<blockquote><p>File <i>programs/02_light_sensor/main.c</i></p><pre>
+<blockquote><p>File <i>programs/03_light_sensor/main.c</i></p><pre>
 
 #include "mfp_memory_mapped_registers.h"
 
@@ -35,7 +580,7 @@ int main ()
 
 <p>Review</p>
 
-<blockquote><p>File <i>programs/02_light_sensor/mfp_memory_mapped_registers.h</i></p><pre>
+<blockquote><p>File <i>programs/03_light_sensor/mfp_memory_mapped_registers.h</i></p><pre>
 
 #ifndef MFP_MEMORY_MAPPED_REGISTERS_H
 #define MFP_MEMORY_MAPPED_REGISTERS_H

@@ -80,20 +80,20 @@ synthesized MIPSfpga system</b></big></p>
 <p>Under Windows:</p>
 
 <blockquote><pre>
-cd programs\lab_yp5
+cd programs\05_cache_misses
 00_clean_all.bat
 </pre></blockquote>
 
 <p>Under Linux:</p>
 
 <blockquote><pre>
-cd programs/lab_yp5
+cd programs/05_cache_misses
 ./00_clean_all.sh
 </pre></blockquote>
 
 <p><big><b>3.5.  Review the lab program code</b></big></p>
 
-<p>The main program is located in file <i>programs/lab_yp5/main.c</i>.</p>
+<p>The main program is located in file <i>programs/05_cache_misses/main.c</i>.</p>
 
 <p>The loop at the beginning (<i>"while ((MFP_SWITCHES & 4) == 0) ;"</i>) is
 needed so that the program can start with high clock speed (25 MHz) and the
@@ -108,7 +108,7 @@ j;"</i> and with uncommented <i>"a [j][i] = i + j;"</i>.  For the first run
 make sure <i>"a [i][j] = i + j;"</i> is uncommented and <i>"a [j][i] = i +
 j;"</i> is commented:</p>
 
-<blockquote><p>File <i>programs/lab_yp5/main.c</i></p>
+<blockquote><p>File <i>programs/05_cache_misses/main.c</i></p>
 <pre>
 
 #include "mfp_memory_mapped_registers.h"
@@ -146,7 +146,7 @@ memory of the synthesized MIPSfpga-based system on the board.</p>
 
 <ol>
 
-<li>cd programs\lab_yp5</li>
+<li>cd programs\05_cache_misses</li>
 
 <li>run 02_compile_and_link.bat</li>
 
@@ -183,7 +183,7 @@ su - $USER
 
 <ol>
 
-<li>cd programs/lab_yp5</li>
+<li>cd programs/05_cache_misses</li>
 
 <li>run ./02_compile_and_link.sh</li>
 
@@ -275,7 +275,7 @@ after this you can see blinks with the frequency of cache fills.</li>
 Comment out <i>"a [i][j] = i + j;"</i> and uncomment <i>"a [j][i] = i +
 j;"</i>.  Now we are going to fill the array by rows, not by columns.</p>
 
-<blockquote><p>File <i>programs/lab_yp5/main.c</i></p>
+<blockquote><p>File <i>programs/05_cache_misses/main.c</i></p>
 <pre>
 
 #include "mfp_memory_mapped_registers.h"

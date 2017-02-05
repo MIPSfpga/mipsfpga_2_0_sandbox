@@ -12,7 +12,7 @@ explained in details.</p>
 
 <p>Review</p>
 
-<blockquote><p>File <i>programs/02_light_sensor/main.c</i></p><pre>
+<blockquote><p>File <i>programs/03_light_sensor/main.c</i></p><pre>
 
 #include "mfp_memory_mapped_registers.h"
 
@@ -35,7 +35,7 @@ int main ()
 
 <p>Review</p>
 
-<blockquote><p>File <i>programs/02_light_sensor/mfp_memory_mapped_registers.h</i></p><pre>
+<blockquote><p>File <i>programs/03_light_sensor/mfp_memory_mapped_registers.h</i></p><pre>
 
 #ifndef MFP_MEMORY_MAPPED_REGISTERS_H
 #define MFP_MEMORY_MAPPED_REGISTERS_H
@@ -686,25 +686,25 @@ synthesized MIPSfpga system</b></big></p>
 <p>Under Windows:</p>
 
 <blockquote><pre>
-cd programs\lab_yp3
+cd programs\03_light_sensor
 00_clean_all.bat
 </pre></blockquote>
 
 <p>Under Linux:</p>
 
 <blockquote><pre>
-cd programs/lab_yp3
+cd programs/03_light_sensor
 00_clean_all.sh
 </pre></blockquote>
 
 <p><big><b>3.8.  Review the lab program code</b></big></p>
 
-<p>The main program is located in file <i>programs/lab_yp3/main.c</i>. After
+<p>The main program is located in file <i>programs/03_light_sensor/main.c</i>. After
 reset and running the boot sequence the <i>main()</i> function calls one of
 several routines written in assembly language, depending on the position of
 three switches in the board: <i>sw[4]</i>, <i>sw[5]</i>, <i>sw[6]</i>:</p>
 
-<blockquote><p>File <i>programs/lab_yp3/main.c</i></p>
+<blockquote><p>File <i>programs/03_light_sensor/main.c</i></p>
 <pre>
 
 #include "mfp_memory_mapped_registers.h"
@@ -728,12 +728,12 @@ int main ()
 
 </pre></blockquote>
 
-<p>The assembly subroutines are located in <i>programs/lab_yp3/demo_bypasses.S</i>.
+<p>The assembly subroutines are located in <i>programs/03_light_sensor/demo_bypasses.S</i>.
 They written in a way to cause different types of pipeline forwarding
 in the simplest fashion, with one forwarded register and without cycle timing
 effects due to cache misses. For example, subroutine <i>demo_bypass_a_from_alu_instruction</i>:</p>
 
-<blockquote><p>File <i>programs/lab_yp3/demo_bypasses.S</i></p>
+<blockquote><p>File <i>programs/03_light_sensor/demo_bypasses.S</i></p>
 <pre>
         . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
@@ -763,7 +763,7 @@ memory of the synthesized MIPSfpga-based system on the board.</p>
 
 <ol>
 
-<li>cd programs\lab_yp3</li>
+<li>cd programs\03_light_sensor</li>
 
 <li>run 02_compile_and_link.bat</li>
 
@@ -800,7 +800,7 @@ su - $USER
 
 <ol>
 
-<li>cd programs/lab_yp3</li>
+<li>cd programs/03_light_sensor</li>
 
 <li>run ./02_compile_and_link.sh</li>
 
@@ -884,7 +884,7 @@ bypass control signals:</p>
 result to the source A of the next instruction. This is consistent with demo
 0 code:</p>
 
-<blockquote><p>File <i>programs/lab_yp3/demo_bypasses.S</i></p>
+<blockquote><p>File <i>programs/03_light_sensor/demo_bypasses.S</i></p>
 <pre>
         . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 1:
