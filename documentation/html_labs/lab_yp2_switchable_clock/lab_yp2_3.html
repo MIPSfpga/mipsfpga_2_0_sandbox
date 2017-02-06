@@ -211,7 +211,7 @@ endmodule
 </pre></blockquote>
 
 <p>It is also necessary to modify the timing constrains in the
-board-specific SDC file:</b></p>
+board-specific SDC file:</p>
 
 <blockquote><p>File <i>de0_cv.sdc</i></p><pre>
 #**************************************************************
@@ -295,10 +295,10 @@ endmodule
 
 <p><b>3.1.5 Review the debouncing modules</b></p>
 
-<li>Synchronizing and debouncing the clock control signals is necessary for
+<p>Synchronizing and debouncing the clock control signals is necessary for
 the clock to work reliably during the mode switching.  Otherwise signal
 bouncing and a possibility of metastable state can introduce bugs in the
-work of the processor.</i></li>
+work of the processor.</p>
 
 <blockquote><p>File <i>mfp_switch_and_button_debouncers.v</i></p><pre>
 module mfp_switch_or_button_sync_and_debouncer
@@ -515,7 +515,7 @@ the loading through UART is not going to work.</li>
 <p>Reset the processor.  The reset buttons for each board are listed
 in the table below:</p>
 
-<p><table border=1 cellpadding=10 cellspacing=0 rules=all>
+<table border=1 cellpadding=10 cellspacing=0 rules=all>
 <tr>
 <th>Board</th>
 <th>Reset button</th>
@@ -529,14 +529,13 @@ in the table below:</p>
 <tr><td>Terasic DE1</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE2-115</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE10-Lite</td><td>Button/Key 0</td></tr>
-</table></p>
+</table>
 
 <p>At this moment you should see the counter running and generating the
 output on seven-segment diplay on FPGA board.  Turn the switch 0 on.  This
 will switch the system clock from 25 MHz to 0.75 Hz, less than one beat per
-second.  You should see LED 7 start blinking, it is connected straight to
-the system clock.  Can you see the sharp difference in counter output?  If
-you don't, check the synthesis configuration.</p>
+second.  Can you see the sharp difference in counter output?  If you don't,
+check the synthesis configuration.</p>
 
 <p>Now try to turn switch 1 on and switch 0 off.  What happened with the
 speed of counting?  Now you are ready to use the switchable clock feature
