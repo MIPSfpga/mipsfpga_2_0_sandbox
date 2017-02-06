@@ -8,7 +8,7 @@ BusBlaster board and OpenOCD software</i>.  Such generic steps are not
 described in this section.  Only the steps different from <i>Lab YP1</i> are
 explained in details.</p>
 
-<p><big><b>3.1.  Review lab code modifications in <i>boards</i> and
+<p><big><b>3.1.  Review the lab code modifications in <i>boards</i> and
 <i>system_rtl</i> directories</b></big></p>
 
 <p>Search for <i>MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX</i> symbol in
@@ -365,325 +365,7 @@ module mfp_multi_switch_or_button_sync_and_debouncer
 endmodule
 </pre></blockquote>
 
-<p><b>3.1.6 Review</b></p>
-
-<blockquote><p>File <i>mfp_seven_segment_displays.v</i></p><pre>
-. . . . . . . . . . . . . . . . . . . . . .
-
-module mfp_multi_digit_display
-(
-    input             clock,
-    input             resetn,
-    input      [31:0] number,
-
-    output reg [ 6:0] seven_segments,
-    output reg        dot,
-    output reg [ 7:0] anodes
-);
-
-    function [6:0] bcd_to_seg (input [3:0] bcd);
-
-        case (bcd)
-        'h0: bcd_to_seg = 'b1000000;  // a b c d e f g
-        'h1: bcd_to_seg = 'b1111001;
-        'h2: bcd_to_seg = 'b0100100;  //   --a--
-        'h3: bcd_to_seg = 'b0110000;  //  |     |
-        'h4: bcd_to_seg = 'b0011001;  //  f     b
-        'h5: bcd_to_seg = 'b0010010;  //  |     |
-        'h6: bcd_to_seg = 'b0000010;  //   --g--
-        'h7: bcd_to_seg = 'b1111000;  //  |     |
-        'h8: bcd_to_seg = 'b0000000;  //  e     c
-        'h9: bcd_to_seg = 'b0011000;  //  |     |
-        'ha: bcd_to_seg = 'b0001000;  //   --d-- 
-        'hb: bcd_to_seg = 'b0000011;
-        'hc: bcd_to_seg = 'b1000110;
-        'hd: bcd_to_seg = 'b0100001;
-        'he: bcd_to_seg = 'b0000110;
-        'hf: bcd_to_seg = 'b0001110;
-        endcase
-
-    endfunction
-
-    reg [2:0] i;
-
-    always @ (posedge clock or negedge resetn)
-    begin
-        if (! resetn)
-        begin
-            seven_segments &lt;=   bcd_to_seg (0);
-            dot            &lt;= ~ 0;
-            anodes         &lt;= ~ 8'b00000001;
-
-            i &lt;= 0;
-        end
-        else
-        begin
-            seven_segments &lt;=   bcd_to_seg (number [i * 4 +: 4]);
-            dot            &lt;= ~ 0;
-            anodes         &lt;= ~ (1 &lt;&lt; i);
-
-            i &lt;= i + 1;
-        end
-    end
-
-endmodule
-</pre></blockquote>
-
-<p><b>3.1 Review</b></p>
-
-<blockquote><p>File <i>nexys4_ddr.v</i></p><pre>
-module nexys4_ddr
-(
-    input         CLK100MHZ,
-    input         CPU_RESETN,
-
-    . . . . . . . . . . . . . . . . . . . .
-
-    input  [15:0] SW, 
-
-    . . . . . . . . . . . . . . . . . . . .
-
-    output        CA,
-    output        CB,
-    output        CC,
-    output        CD,
-    output        CE,
-    output        CF,
-    output        CG,
-    output        DP,
-
-    output [ 7:0] AN,
-
-    . . . . . . . . . . . . . . . . . . . .
-);
-    . . . . . . . . . . . . . . . . . . . .
-
-    wire [`MFP_7_SEGMENT_HEX_WIDTH - 1:0] IO_7_SegmentHEX;
-
-    . . . . . . . . . . . . . . . . . . . .
-
-    wire display_clock;
-
-    mfp_clock_divider_100_MHz_to_763_Hz mfp_clock_divider_100_MHz_to_763_Hz
-        (CLK100MHZ, display_clock);
-
-    mfp_multi_digit_display multi_digit_display
-    (
-        .clock          ( display_clock                  ),
-        .resetn         ( CPU_RESETN                     ),
-        .number         ( IO_7_SegmentHEX                ),
-
-        .seven_segments ( { CG, CF, CE, CD, CC, CB, CA } ),
-        .dot            ( DP                             ),
-        .anodes         ( AN                             )
-    );
-
-endmodule
-</pre></blockquote>
-
-<p><b>3.1 Review</b></p>
-
-<blockquote><p>File <i>mfp_seven_segment_displays.v</i></p><pre>
-module mfp_single_digit_seven_segment_display
-(
-    input      [3:0] digit,
-    output reg [6:0] seven_segments
-);
-
-    always @*
-        case (digit)
-        'h0: seven_segments = 'b1000000;  // a b c d e f g
-        'h1: seven_segments = 'b1111001;
-        'h2: seven_segments = 'b0100100;  //   --a--
-        'h3: seven_segments = 'b0110000;  //  |     |
-        'h4: seven_segments = 'b0011001;  //  f     b
-        'h5: seven_segments = 'b0010010;  //  |     |
-        'h6: seven_segments = 'b0000010;  //   --g--
-        'h7: seven_segments = 'b1111000;  //  |     |
-        'h8: seven_segments = 'b0000000;  //  e     c
-        'h9: seven_segments = 'b0011000;  //  |     |
-        'ha: seven_segments = 'b0001000;  //   --d-- 
-        'hb: seven_segments = 'b0000011;
-        'hc: seven_segments = 'b1000110;
-        'hd: seven_segments = 'b0100001;
-        'he: seven_segments = 'b0000110;
-        'hf: seven_segments = 'b0001110;
-        endcase
-
-endmodule
-
-. . . . . . . . . . . . . . . . . . . . . .
-</pre></blockquote>
-
-<p><b>3.1 Review</b></p>
-
-<blockquote><p>File <i>de0_cv.v</i></p><pre>
-`include "mfp_ahb_lite_matrix_config.vh"
-
-module de0_cv
-(
-    . . . . . . . . . . . . . . . . . . . .
-
-    output  [ 6:0]  HEX0,
-    output  [ 6:0]  HEX1,
-    output  [ 6:0]  HEX2,
-    output  [ 6:0]  HEX3,
-    output  [ 6:0]  HEX4,
-    output  [ 6:0]  HEX5,
-
-    . . . . . . . . . . . . . . . . . . . .
-);
-    . . . . . . . . . . . . . . . . . . . .
-
-    wire [`MFP_7_SEGMENT_HEX_WIDTH - 1:0] IO_7_SegmentHEX;
-
-    . . . . . . . . . . . . . . . . . . . .
-
-    mfp_single_digit_seven_segment_display digit_5 ( IO_7_SegmentHEX [23:20] , HEX5 );
-    mfp_single_digit_seven_segment_display digit_4 ( IO_7_SegmentHEX [19:16] , HEX4 );
-    mfp_single_digit_seven_segment_display digit_3 ( IO_7_SegmentHEX [15:12] , HEX3 );
-    mfp_single_digit_seven_segment_display digit_2 ( IO_7_SegmentHEX [11: 8] , HEX2 );
-    mfp_single_digit_seven_segment_display digit_1 ( IO_7_SegmentHEX [ 7: 4] , HEX1 );
-    mfp_single_digit_seven_segment_display digit_0 ( IO_7_SegmentHEX [ 3: 0] , HEX0 );
-
-endmodule
-</pre></blockquote>
-
-<p><b>3.1 Review</b></p>
-
-<blockquote><p>File <i>main.c</i></p><pre>
-#include "mfp_memory_mapped_registers.h"
-
-int main ()
-{
-    int n;
-
-    for (n = 0;; n ++)
-    {
-        MFP_RED_LEDS      = n;
-        MFP_GREEN_LEDS    = n;
-        MFP_7_SEGMENT_HEX = ((n >> 8) & 0xffffff00) | (n & 0xff);
-    }
-
-    return 0;
-}
-</pre></blockquote>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p><big><b>3.4. Review lab code modifications in <i>system_rtl</i> and
-<i>testbench</i> directories</b></big></p>
-
-<p>Search for <i>MFP_DEMO_PIPE_BYPASS</i> symbol in <i>system_rtl</i> and
-<i>testbench</i> directories. Review the code fragments where that symbol
-occurs.</p>
-
-<p>Modify the configuration parameters in the file
-<i>system_rtl/mfp_ahb_lite_matrix_config.vh</i> as follows:</p>
-
-<blockquote><pre>
-
-//
-//  Configuration parameters
-//
-
-// `define MFP_USE_WORD_MEMORY
-// `define MFP_INITIALIZE_MEMORY_FROM_TXT_FILE
-   `define MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
-   `define MFP_USE_UART_PROGRAM_LOADER
-// `define MFP_DEMO_LIGHT_SENSOR
-// `define MFP_DEMO_CACHE_MISSES
-   `define MFP_DEMO_PIPE_BYPASS
-
-</pre></blockquote>
-
-<p>Review the following fragments of <i>system_rtl/mfp_system.v</i>:</p>
-
-<blockquote><pre>
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-`ifdef MFP_DEMO_PIPE_BYPASS
-    wire         mpc_aselres_e;
-    wire         mpc_aselwr_e;
-    wire         mpc_bselall_e;
-    wire         mpc_bselres_e;
-`endif
-
-    m14k_top m14k_top
-    (
-
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-        .UDI_toudi             ( UDI_toudi             )
-
-`ifdef MFP_DEMO_PIPE_BYPASS
-        ,
-        .mpc_aselres_e         ( mpc_aselres_e         ),     
-        .mpc_aselwr_e          ( mpc_aselwr_e          ),     
-        .mpc_bselall_e         ( mpc_bselall_e         ),     
-        .mpc_bselres_e         ( mpc_bselres_e         )      
-`endif
-
-    );
-
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-    `ifdef MFP_DEMO_CACHE_MISSES
-
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-    `elsif MFP_DEMO_PIPE_BYPASS
-
-    assign IO_GreenLEDs = { { `MFP_N_GREEN_LEDS - 5 { 1'b0 } },
-
-        HCLK,
-        mpc_aselres_e,  // Bypass res_m as src A
-        mpc_bselres_e   // Bypass res_m as src B
-        mpc_aselwr_e,   // Bypass res_w as src A
-        mpc_bselall_e,  // Bypass res_w as src B
-    };
-
-    `endif
-
-</pre></blockquote>
-
-<p><big><b>3.5.  Connect the board to the computer</b></big></p>
+<p><big><b>3.2.  Connect the board to the computer</b></big></p>
 
 <p>For <i>Digilent</i> boards, such as <i>Nexys4</i>, <i>Nexys4 DDR</i> or
 <i>Basys3</i>, this step is obvious.  For <i>Altera/Terasic</i> boards some
@@ -720,12 +402,12 @@ Failing to do so may result in electric damage to the board.</li>
 
 </ol>
 
-<p><big><b>3.6.  Run the synthesis and configure the FPGA with the
+<p><big><b>3.3  Run the synthesis and configure the FPGA with the
 synthesized MIPSfpga system</b></big></p>
 
 <p>This step is identical to the synthesis step in <i>Lab YP1</i></p>
 
-<p><big><b>3.7.  Go to the lab directory and clean it up</b></big></p>
+<p><big><b>3.4  Go to the lab directory and clean it up</b></big></p>
 
 <p>Under Windows:</p>
 
@@ -741,63 +423,31 @@ cd programs/lab_yp2
 00_clean_all.sh
 </pre></blockquote>
 
-<p><big><b>3.8.  Review the lab program code</b></big></p>
+<p><b>3.5 Review the lab program code</b></p>
 
-<p>The main program is located in file <i>programs/lab_yp2/main.c</i>. After
-reset and running the boot sequence the <i>main()</i> function calls one of
-several routines written in assembly language, depending on the position of
-three switches in the board: <i>sw[4]</i>, <i>sw[5]</i>, <i>sw[6]</i>:</p>
+<p>The lab program code is a simple counter.  The value output to
+multi-digit seven-segment display is constructed in a way that shows the
+incrementing digits with both fast multi-MHz clock and slow ~1 Hz clock:</p>
 
-<blockquote><p>File <i>programs/lab_yp2/main.c</i></p>
-<pre>
-
+<blockquote><p>File <i>main.c</i></p><pre>
 #include "mfp_memory_mapped_registers.h"
 
 int main ()
 {
-    MFP_7_SEGMENT_HEX = MFP_SWITCHES >> 4;
+    int n;
 
-    switch (MFP_SWITCHES >> 4)
+    for (n = 0;; n ++)
     {
-        case 0: demo_bypass_a_from_alu_instruction        (); break;
-        case 1: demo_bypass_b_from_alu_instruction        (); break;
-        case 2: demo_bypass_a_and_b_from_alu_instruction  (); break;
-        case 3: demo_bypass_a_from_load_instruction       (); break;
-        case 4: demo_bypass_b_from_load_instruction       (); break;
-        case 5: demo_bypass_a_and_b_from_load_instruction (); break;
+        MFP_RED_LEDS      = n;
+        MFP_GREEN_LEDS    = n;
+        MFP_7_SEGMENT_HEX = ((n >> 8) & 0xffffff00) | (n & 0xff);
     }
 
     return 0;
 }
-
 </pre></blockquote>
 
-<p>The assembly subroutines are located in <i>programs/lab_yp2/demo_bypasses.S</i>.
-They written in a way to cause different types of pipeline forwarding
-in the simplest fashion, with one forwarded register and without cycle timing
-effects due to cache misses. For example, subroutine <i>demo_bypass_a_from_alu_instruction</i>:</p>
-
-<blockquote><p>File <i>programs/lab_yp2/demo_bypasses.S</i></p>
-<pre>
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-        .text
-
-        .global demo_bypass_a_from_alu_instruction
-
-demo_bypass_a_from_alu_instruction:
-
-        li      t0, 0x001
-        li      t1, 0x010
-1:
-        addiu   t1, t0, 1
-        addu    t2, t1, t0
-        b       1b
-        nop
-
-</pre></blockquote>
-
-<p><big><b>3.9.  Prepare the first software run</b></big></p>
+<p><big><b>3.6  Prepare the first software run</b></big></p>
 
 <p>Following the procedure described in <i>Lab YP1</i>, compile and link the
 program, generate Motorola S-Record file and upload this file into the
@@ -818,12 +468,9 @@ memory of the synthesized MIPSfpga-based system on the board.</p>
 <li>edit 12_upload_to_the_board_using_uart.bat based on the result from the
 previous step - set the working port in “set a=” assignment.</li>
 
-<li>Make sure the switches 0, 1, 4, 5, 6 on FPGA board are turned off. 
-Switches 0 and 1 control the speed of the clock, while switches 4, 5, and 6
-determines which pipeline bypass demo function is called after reset and
-boot sequence
- - see <i>3.8.  Review the lab program code</i>.  If the switches 0
-and 1 are not off, the loading through UART is not going to work.</li>
+<li>Make sure the switches 0 and 1 on FPGA board are turned off.  Switches 0
+and 1 control the speed of the clock.  If the switches 0 and 1 are not off,
+the loading through UART is not going to work.</li>
 
 <li>run 12_upload_to_the_board_using_uart.bat</li>
 
@@ -855,28 +502,17 @@ su - $USER
 <li>edit ./12_upload_to_the_board_using_uart.sh based on the result from the
 previous step - set the working port in “set a=” assignment</li>
 
-<li>Make sure the switches 0, 1, 4, 5, 6 on FPGA board are turned off. 
-Switches 0 and 1 control the speed of the clock, while switches 4, 5, and 6
-determines which pipeline bypass demo function is called after reset and
-boot sequence
- - see <i>3.8.  Review the lab program code</i>.  If the switches 0
-and 1 are not off, the loading through UART is not going to work.</li>
+<li>Make sure the switches 0 and 1 on FPGA board are turned off.  Switches 0
+and 1 control the speed of the clock.  If the switches 0 and 1 are not off,
+the loading through UART is not going to work.</li>
 
 <li>./run 12_upload_to_the_board_using_uart.sh</li>
 
 </ol>
 
-<p><big><b>3.10. The first run</b></big></p>
+<p><big><b>3.7 Run the software on the board</b></big></p>
 
-<ol>
-
-<li>Set the switches 4, 5 and 6 on FPGA board to off position. Such setting
-means that after the reset the program will run assembly demo number 0. Make
-sure the switches 0 and 1 are off, otherwise the boot sequence (a sequence
-of processor instructions before <i>main</i> function) will take too long,
-since these switches control the clock frequency.</li>
-
-<li><p>Reset the processor.  The reset buttons for each board are listed
+<p>Reset the processor.  The reset buttons for each board are listed
 in the table below:</p>
 
 <p><table border=1 cellpadding=10 cellspacing=0 rules=all>
@@ -895,59 +531,13 @@ in the table below:</p>
 <tr><td>Terasic DE10-Lite</td><td>Button/Key 0</td></tr>
 </table></p>
 
-</li>
+<p>At this moment you should see the counter running and generating the
+output on seven-segment diplay on FPGA board.  Turn the switch 0 on.  This
+will switch the system clock from 25 MHz to 0.75 Hz, less than one beat per
+second.  You should see LED 7 start blinking, it is connected straight to
+the system clock.  Can you see the sharp difference in counter output?  If
+you don't, check the synthesis configuration.</p>
 
-<li>Turn the switch 0 on.  This will switch the system clock from 25 MHz to
-0.75 Hz, less than one beat per second.  You should see LED 7 start
-blinking, it is connected straight to the system clock.</li>
-
-<li>Check that the seven-segment display shows "0" which is consistent
-with switches 4, 5, 6 and the code of the program.</li>
-
-<li><p>Now turn your attention to LEDs 0, 1, 2, 3. They are connected to the following
-bypass control signals:</p>
-
-<p><table border=1 cellpadding=10 cellspacing=0 rules=all>
-<tr>
-<th rowspan=2>LEDs (left to right)</th>
-<th colspan=2>Bypass control signals</th>
-</tr>
-<tr>
-<th>Name</th>
-<th>Function (according to the comment in Verilog code)</th>
-</tr>
-<tr><td>3</td><td>mpc_aselres_e</td><td>Bypasses result from M stage (res_m) as source A (rs) for the next instruction</td></tr>
-<tr><td>2</td><td>mpc_bselres_e</td><td>Bypasses result from M stage (res_m) as source B (rt) for the next instruction</td></tr>
-<tr><td>1</td><td>mpc_aselwr_e</td><td>Bypasses result from A stage (res_w) as source A (rs) for the next instruction</td></tr>
-<tr><td>0</td><td>mpc_bselall_e</td><td>Bypasses result from A stage (res_w) as source B (rt) for the next instruction</td></tr>
-</table></p>
-
-</li>
-
-<li><p>You can see LED 3 blinking from time to time, indicating bypass of ALU
-result to the source A of the next instruction. This is consistent with demo
-0 code:</p>
-
-<blockquote><p>File <i>programs/lab_yp2/demo_bypasses.S</i></p>
-<pre>
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-1:
-        addiu   t1, t0, 1
-        addu    t2, t1, t0
-        b       1b
-        nop
-
-</pre></blockquote>
-
-</li>
-</ol>
-
-<p><big><b>3.11. The subsequent runs</b></big></p>
-
-<p>Set the switches 4, 5 and 6 on FPGA board to another position (001), set
-the switch 0 to off position, then reset the processor, turn switch 1 on and
-observe the patterns of blinking again.Repeat for all 6 bypass demos, with
-switches 4, 5 and 6 set to 000, 001, 010, 011, 100, 101. Does the expected
-behavior, based on reviewing the assembly code, always matches the pattern?
-If not, look to the logic that uses bypass control signals and try to
-explain what happens.</p>
+<p>Now try to turn switch 1 on and switch 0 off.  What happened with the
+speed of counting?  Now you are ready to use the switchable clock feature
+for the subsequent labs.</p>
