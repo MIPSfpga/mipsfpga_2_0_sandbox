@@ -1,15 +1,15 @@
 <p><big><b>2.  The theory of operation</b></big></p>
 
 <p><b><font color=blue>Figure 1</font></b> shows the sensor used in this
-lab, Digilent PmodALS - Ambient Light Sensor. You can order this sensor from
-website <a
+lab, Digilent PmodALS - Ambient Light Sensor.  You can order this sensor
+from website <a
 href="http://store.digilentinc.com/pmod-als-ambient-light-sensor/">
 http://store.digilentinc.com/pmod-als-ambient-light-sensor</a> for
 $9.99.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 1. <a
+<p><b><font color=blue>Figure 1.  <a
 href="http://store.digilentinc.com/pmod-als-ambient-light-sensor/">Digilent
 PmodALS - Ambient Light Sensor</a></font></b></p>
 
@@ -21,20 +21,20 @@ width="500" /></a></p>
 </center>
 
 <p>The sensor communicates with other devices using a protocol called Serial
-Peripheral Interface (SPI). This protocol is called serial because it
-transmits bits sequentially using few pins. The serial protocols are
+Peripheral Interface (SPI).  This protocol is called serial because it
+transmits bits sequentially using few pins.  The serial protocols are
 convenient to connect connect chips on a printed circuit boards, because the
 number of available pins coming out of a typical chip is limited.</p>
 
 <p><b><font color=blue>Figure 2</font></b> illustrates how the information
-is transmitted using SPI protocol. You can get more information about the
+is transmitted using SPI protocol.  You can get more information about the
 mechanics of SPI protocol from an article on Digilent web site at <a
 href="https://reference.digilentinc.com/pmod:communication_protocols:spi">
 https://reference.digilentinc.com/pmod:communication_protocols:spi</a>.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 2. <a
+<p><b><font color=blue>Figure 2.  <a
 href="https://reference.digilentinc.com/pmod:communication_protocols:spi">SPI
 protocol</a> illustration from <a href="http://digilentinc.com">Digilent</a>
 website</a></font></b></p>
@@ -48,13 +48,13 @@ width="500" /></a>
 
 <p>The specific variant of SPI protocol used by the light sensor is
 described in sensor documentation that can be downloaded from <a
-href="https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf">https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf</a>.
+href="https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf">https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf</a>. 
 The exerpt from that documentation is on <b><font color=blue>Figure
 3</font></b>.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 3. The description of a version of SPI
+<p><b><font color=blue>Figure 3.  The description of a version of SPI
 protocol used in Digilent PmodALS - Ambient Light Sensor from <a
 href="https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf">https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf</a>
 </font></b></p>
@@ -75,14 +75,14 @@ width="500" />
 </center>
 
 <p>SPI is not the only serial protocol that can be used to communicate with
-sensors, actuators and other computers. <b><font color=blue>Figure
+sensors, actuators and other computers.  <b><font color=blue>Figure
 4</font></b> contains a table that compares three most popular serial
 protocols used for simple point-to-point connections in embedded systems:
 SPI, UART and I<sup>2</sup>C.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 4. Serial protocol comparison table from a
+<p><b><font color=blue>Figure 4.  Serial protocol comparison table from a
 book <a
 href="https://www.amazon.com/Programming-32-bit-Microcontrollers-Exploring-Technology/dp/0750687096">
 Programming 32-bit Microcontrollers in C: Exploring the PIC32 by Lucio Di
@@ -115,26 +115,26 @@ Interface (AXI)</li>
 </ul>
 
 <p>These protocols are parallel - they transmit multiple bits of information
-in one clock cycle, using multiple wires. Minimizing the number of wires for
-connectons inside a typical chip is not a critical task, more important is
-maximizing the amount of information transmitted per clock cycle.</p>
+in one clock cycle, using multiple wires.  Minimizing the number of wires
+for connectons inside a typical chip is not a critical task, more important
+is maximizing the amount of information transmitted per clock cycle.</p>
 
 <p>In addition, synchronizing signals on multiple parallel wires inside the
-chip is much easier than outside. Outside the chip, noise and different wire
-length can be the issues. Because of it, the on-chip buses tend to be
+chip is much easier than outside.  Outside the chip, noise and different
+wire length can be the issues.  Because of it, the on-chip buses tend to be
 parallel, while off-chip protocols are frequently serial.</p>
 
 <p>MIPS microAptiv UP core inside MIPSfpga SoC uses a protocol called
 AHB-Lite, a simplified variant of AHB, that assumes one master device and
-multiple slave devices in one system (full AHB allows multiple masters).
+multiple slave devices in one system (full AHB allows multiple masters). 
 <b><font color=blue>Figure 5</font></b> shows the general structure of
-MIPSfpga system based on AHB-Lite interconnect. The protocol is documented
+MIPSfpga system based on AHB-Lite interconnect.  The protocol is documented
 in <i>MIPS32&reg; microAptiv&trade; UP Processor Core AHB-Lite Interface</i>
 manual included into MIPSfpga package.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 5. AHB-Lite interconnect in MIPSfpga
+<p><b><font color=blue>Figure 5.  AHB-Lite interconnect in MIPSfpga
 system</font></b></p>
 
 <img
@@ -144,7 +144,7 @@ width="500" />
 </center>
 
 <p>AHB-Lite transactions include single and burst variants of reads and
-writes. Address and data in those transactions are pipelined, which means
+writes.  Address and data in those transactions are pipelined, which means
 that the address on a new transaction can be transmitted simultaneously with
 data for the previous transaction, as show on <b><font color=blue>Figure
 6</font></b> for single reads and <b><font color=blue>Figure 7</font></b>
@@ -167,7 +167,7 @@ width="500" /> </a>
 
 <center>
 
-<p><b><font color=blue>Figure 7. A waveform of a single AHB-Lite write
+<p><b><font color=blue>Figure 7.  A waveform of a single AHB-Lite write
 transaction from <a
 href="http://mazsola.iit.uni-miskolc.hu/~drdani/docs_arm/IHI0033A_AMBA3_AHB_Lite.pdf">AHB-Lite
 specification</a> </font></b></p>
@@ -180,15 +180,14 @@ width="500" /> </a>
 
 </center>
 
-<p><b><font color=blue>Figure 8</font></b> shows how the light sensor
-module is instantiated in the module hierarchy for Digilent Nexys4 DDR board
-that carries Xilinx Artix-7 FPGA.  <b><font color=blue>Figure 9</font></b>
-shows the same for Terasic DE0-CV board that carries Altera Cyclon V
-FPGA.</p>
+<p><b><font color=blue>Figure 8</font></b> shows how the light sensor module
+is instantiated in the module hierarchy for Digilent Nexys4 DDR board that
+carries Xilinx Artix-7 FPGA.  <b><font color=blue>Figure 9</font></b> shows
+the same for Terasic DE0-CV board that carries Altera Cyclon V FPGA.</p>
 
 <center>
 
-<p><b><font color=blue>Figure 8. MIPSfpga module hierarchy, including the
+<p><b><font color=blue>Figure 8.  MIPSfpga module hierarchy, including the
 light sensor module, for <a
 href="http://store.digilentinc.com/nexys-4-ddr-artix-7-fpga-trainer-board-recommended-for-ece-curriculum/">Digilent
 Nexys4 DDR board</a> that carries Xilinx Artix-7 FPGA</font></b></p>
@@ -203,7 +202,7 @@ src="http://silicon-russia.com/pages/2015_12_28/hierarchy_nexys4_ddr_full.png"
 
 <center>
 
-<p><b><font color=blue>Figure 9. MIPSfpga module hierarchy, including the
+<p><b><font color=blue>Figure 9.  MIPSfpga module hierarchy, including the
 light sensor module, for <a href="http://de0-cv.terasic.com">Terasic
 DE0-CVboard</a> that carries Altera Cyclon V FPGA</font></b></p>
 

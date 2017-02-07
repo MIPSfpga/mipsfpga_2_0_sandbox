@@ -1,5 +1,5 @@
 
-<p><big><b>3. Lab steps</b></big></p>
+<p><big><b>3.  Lab steps</b></big></p>
 
 <p>This section outlines the sequence of steps, necessary to complete the
 lab.  Almost all generic steps in this lab are the same as in <i>MIPSfpga
@@ -10,12 +10,12 @@ explained in details.</p>
 
 <p><big><b>3.1 Review the software part of the lab</b></big></p>
 
-<p>In order to understand what we are trying to achieve, it makes sense
-start from software in this lab.  Review the following C program.  The
-program reads a value from a memory-mapped I/O register connected to the
-current light sensor value.  After reading the value, the program sends it
-on output devices: red and green LED indicators and multiple-digit
-seven-segment display (if present on the board).</p>
+<p>In order to understand what we are trying to achieve in this lab, it
+makes sense to start from the software.  Review the following C program. 
+The program reads a value from a memory-mapped I/O register that contains
+the current light sensor value.  After reading the value, the program sends
+it to output devices: red and green LEDs and multiple-digit seven-segment
+display (if present on the board).</p>
 
 <blockquote><p>File <i>programs/03_light_sensor/main.c</i></p><pre>
 
@@ -37,10 +37,11 @@ int main ()
 </pre></blockquote>
 
 <p>Memory-mapped registers are defined in the following header file,
-included in the main program.  As you can see, the address of light-sensor
-I/O register is in uncached area with virtual address 0xBF800010 (physical
-address 0x1F800010).  C <i>#define</i> macro <i>MFP_LIGHT_SENSOR</i> makes
-this register look jmust like a variable.</p>
+included in the main program.  As you can see, the address of the
+light-sensor I/O register is located in the uncached area of the memory with
+virtual address 0xBF800010 (physical address 0x1F800010).  C <i>#define</i>
+macro <i>MFP_LIGHT_SENSOR</i> makes this register look just like a
+variable.</p>
 
 <blockquote><p>File <i>programs/03_light_sensor/mfp_memory_mapped_registers.h</i></p><pre>
 
@@ -62,16 +63,17 @@ this register look jmust like a variable.</p>
 #define MFP_LIGHT_SENSOR        (* (volatile unsigned *) MFP_LIGHT_SENSOR_ADDR  )
 </pre></blockquote>
 
-<p><big><b>3.2 Review the hardware module that handles SPI protocol</b></big></p>
+<p><big><b>3.2 Review the hardware module that handles SPI
+protocol</b></big></p>
 
 <p>In this lab we don't need to handle all cases of SPI protocol.  A generic
-flexible interface module would be quite long and complicated.  Such modules
-can be licensed as a licensable IP core.  However we are dealing with a specific sensor,
-and its interface is fixed: it simply produces 16 bits of data serially when
-<i>cs</i> ("chip select:) signal goes low.  This specific version of SPI
-interface is also relatively slow, so we can sample the data just by
-counting clock cycles and putting the received bits into a shift register on specific
-clock cycles.</p>
+flexible interface module would be quite long and complicated, such module
+can be licensed as a licensable IP core.  However in this lab we are dealing
+with a specific sensor, and its interface is fixed: it simply produces 16
+bits of data serially when <i>cs</i> ("chip select:) signal goes low.  This
+specific version of SPI interface is also relatively slow, so we can sample
+the data simply by counting clock cycles and putting the received bits into
+a shift register on specific clock cycles.</p>
 
 <p>Study the code below.  How frequently does the signal <i>sample_bit</i>
 go high?  What about the signal <i>value_done</i>?  Can you explain or guess
@@ -127,11 +129,12 @@ module mfp_pmod_als_spi_receiver
 endmodule
 </pre></blockquote>
 
-<p><big><b>3.3 Review the glue logic that interface SPI interfacing module in AHB-Lite fabric</b></big></p>
+<p><big><b>3.3 Review the glue logic that interface SPI interfacing module
+in AHB-Lite fabric</b></big></p>
 
-<p>Search for <i>MFP_DEMO_LIGHT_SENSOR</i> symbol in <i>boards</i>
-and <i>system_rtl</i> directories.  Review the code fragments
-where that symbol occurs.</p>
+<p>Search for <i>MFP_DEMO_LIGHT_SENSOR</i> symbol in <i>boards</i> and
+<i>system_rtl</i> directories.  Review the code fragments where that symbol
+occurs.</p>
 
 <p><b>3.3.1  System configuration</b></p>
 
@@ -156,8 +159,8 @@ where that symbol occurs.</p>
 . . . . . . . . . . . . . . . . . . . . . .
 </pre></blockquote>
 
-<p>Review the added `defines for the physical address of the memory-mapped register
-and I/O identification number for the added light sensor peripheral
+<p>Review the added `defines for the physical address of the memory-mapped
+register and I/O identification number for the added light sensor peripheral
 in the same file <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i>:</p>
 
 <blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i></p><pre>
@@ -186,8 +189,9 @@ in the same file <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i>:</p>
 
 <p><b>3.3.2  Review the board wrapper file for Xilinx</b></p>
 
-<p>The top-level module <i>nexys4_ddr</i> instantiates board-independent module <i>mfp_system</i>
-and connect the designated GPIO pins to SPI inputs of this module:</p>
+<p>The top-level module <i>nexys4_ddr</i> instantiates a board-independent
+module <i>mfp_system</i> and connect the designated GPIO pins to SPI inputs
+of <i>mfp_system</i> module:</p>
 
 <blockquote><p>File <i>boards/nexys4_ddr/nexys4_ddr.v</i></p><pre>
 
@@ -223,8 +227,9 @@ module nexys4_ddr
 
 <p><b>3.3.3  Review the board wrapper file for Altera</b></p>
 
-<p>The top-level module <i>de0_cv</i> instantiates board-independent module <i>mfp_system</i>
-and connect the designated GPIO pins to SPI inputs of this module:</p>
+<p>The top-level module <i>de0_cv</i> instantiates a board-independent
+module <i>mfp_system</i> and connect the designated GPIO pins to SPI inputs
+of <i>mfp_system</i> module:</p>
 
 <blockquote><p>File <i>boards/de0_cv/de0_cv.v</i></p><pre>
 
@@ -264,8 +269,8 @@ module de0_cv
 
 <p><b>3.3.4  Review the board-independent top system module</b></p>
 
-<p>Note this module instantiates the CPU core, the AHB-Lite interconnect and the newly
-added SPI interfacing module that works with the light sensor:</p>
+<p>Note this module instantiates the CPU core, the AHB-Lite interconnect and
+the newly added SPI interfacing module that works with the light sensor:</p>
 
 <blockquote><p>File <i>system_rtl/mfp_system.v</i></p><pre>
 
@@ -318,7 +323,8 @@ module mfp_system
     `endif
 </pre></blockquote>
 
-<p><b>3.3.5  Review the code that propagates the received value down the module hierarchy</b></p>
+<p><b>3.3.5  Review the code that propagates the received light sensor value
+down the module hierarchy</b></p>
 
 <blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix_with_loader.v</i></p><pre>
 
@@ -385,11 +391,13 @@ module mfp_ahb_lite_matrix
     );
 </pre></blockquote>
 
-<p><b>3.3.6  Review how GPIO slave connects the value to the system bus</b></p>
+<p><b>3.3.6  Review how GPIO slave connects the received value to the system
+bus</b></p>
 
 <p>The general-purpose input-output module connects the wires coming from
-several peripherals to AHB-Lite system bus in order to make these peripherals
-visible to the software. The peripherals include buttons, switches, LEDs and now the light sensor:</p>
+several peripherals to AHB-Lite system bus in order to make these
+peripherals visible to the software.  The peripherals include buttons,
+switches, LEDs and now the light sensor:</p>
 
 <blockquote><p>File <i>mfp_ahb_gpio_slave.v</i></p><pre>
 
@@ -494,14 +502,15 @@ module mfp_ahb_gpio_slave
 endmodule
 </pre></blockquote>
 
-<p><big><b>3.5. Connect the light sensor to the board</b></big></p>
+<p><big><b>3.5.  Connect the light sensor to the board</b></big></p>
 
 <p>For <i>Digilent</i> boards, such as <i>Nexys4</i>, <i>Nexys4 DDR</i> or
-<i>Basys3</i> can be just inserted into the proper position of JA or JB
-port. Please see pin information in .XDC file and in board documentation
-from Digilent to figure out how to connect the sensor. For <i>Altera/Terasic</i>
-boards you need to use female-to-female jumper wires to connect the sensor to the appropriate
-GPIO pins.</p>
+<i>Basys3</i>, the light sensor can be just inserted into the proper
+position of JA or JB port.  Please see the pin information in .XDC file and
+in the board documentation from Digilent to figure out how to connect the
+sensor to Digulent boards.  For <i>Altera/Terasic</i> boards you need to use
+female-to-female jumper wires to connect the sensor to the appropriate GPIO
+pins.</p>
 
 <p><big><b>3.6.  Connect the board to the computer</b></big></p>
 
@@ -645,9 +654,8 @@ in the table below:</p>
 <tr><td>Terasic DE10-Lite</td><td>Button/Key 0</td></tr>
 </table>
 
-<p>At this moment you should see the light meter working
-- the seven-segment should start displaying the level of light.
-If it is not working, check the cables, software and hardware configuration.
-Try bringing the board to the source of light, then cover it with your hand
-and watch the result on the display.
-</p>
+<p>At this moment you should see the light meter working - the seven-segment
+display should start displaying the level of light.  If it is not working,
+check the cables, software and hardware configuration.  Try bringing the
+board to the source of light, then cover it with your hand and watch the
+result on the display going to 0.</p>
