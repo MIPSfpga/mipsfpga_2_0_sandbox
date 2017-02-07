@@ -127,13 +127,13 @@ href="https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm
 <a
 href="https://reference.digilentinc.com/_media/reference/pmod/pmodals/pmodals_rm.pdf">
 
-<p><img
+<img
 src="http://www.silicon-russia.com/wp-content/uploads/2015/12/Screenshot-2015-12-30-22.44.55.png"
-width="500" /> </p>
+width="500" />
 
-<p><img
+<img
 src="http://www.silicon-russia.com/wp-content/uploads/2015/12/Screenshot-2015-12-30-22.45.24.png"
-width="500" /></p>
+width="500" />
 
 </a>
 
@@ -245,6 +245,12 @@ width="500" /> </a>
 
 </center>
 
+<p><b><font color=blue>Figure 8</font></b> shows how the light sensor
+module is instantiated in the module hierarchy for Digilent Nexys4 DDR board
+that carries Xilinx Artix-7 FPGA.  <b><font color=blue>Figure 9</font></b>
+shows the same for Terasic DE0-CV board that carries Altera Cyclon V
+FPGA.</p>
+
 <center>
 
 <p><b><font color=blue>Figure 8. MIPSfpga module hierarchy, including the
@@ -281,9 +287,14 @@ BusBlaster board and OpenOCD software</i>.  Such generic steps are not
 described in this section.  Only the steps different from <i>Lab YP1</i> are
 explained in details.</p>
 
-<p><b>3.1 Review</b></p>
+<p><big><b>3.1 Review the software part of the lab</b></big></p>
 
-<p>Review</p>
+<p>In order to understand what we are trying to achieve, it makes sense
+start from software in this lab.  Review the following C program.  The
+program reads a value from a memory-mapped I/O register connected to the
+current light sensor value.  After reading the value, the program sends it
+on output devices: red and green LED indicators and multiple-digit
+seven-segment display (if present on the board).</p>
 
 <blockquote><p>File <i>programs/03_light_sensor/main.c</i></p><pre>
 
@@ -297,16 +308,18 @@ int main ()
     {
         MFP_RED_LEDS      = MFP_LIGHT_SENSOR &gt;&gt; 4;
         MFP_7_SEGMENT_HEX = MFP_LIGHT_SENSOR;
-        MFP_GREEN_LEDS    = n ++;
+        MFP_GREEN_LEDS    = MFP_LIGHT_SENSOR &gt;&gt; 4;
     }
 
     return 0;
 }
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
-
-<p>Review</p>
+<p>Memory-mapped registers are defined in the following header file,
+included in the main program.  As you can see, the address of light-sensor
+I/O register is in uncached area with virtual address 0xBF800010 (physical
+address 0x1F800010).  C <i>#define</i> macro <i>MFP_LIGHT_SENSOR</i> makes
+this register look jmust like a variable.</p>
 
 <blockquote><p>File <i>programs/03_light_sensor/mfp_memory_mapped_registers.h</i></p><pre>
 
@@ -328,9 +341,21 @@ int main ()
 #define MFP_LIGHT_SENSOR        (* (volatile unsigned *) MFP_LIGHT_SENSOR_ADDR  )
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><big><b>3.2 Review the hardware module that handles SPI protocol</b></big></p>
 
-<p>Review</p>
+<p>In this lab we don't need to handle all cases of SPI protocol.  A generic
+flexible interface module would be quite long and complicated.  Such modules
+can be licensed as a licensable IP core.  However we are dealing with a specific sensor,
+and its interface is fixed: it simply produces 16 bits of data serially when
+<i>cs</i> ("chip select:) signal goes low.  This specific version of SPI
+interface is also relatively slow, so we can sample the data just by
+counting clock cycles and putting the received bits into a shift register on specific
+clock cycles.</p>
+
+<p>Study the code below.  How frequently does the signal <i>sample_bit</i>
+go high?  What about the signal <i>value_done</i>?  Can you explain or guess
+what would happen if we store the result in <i>value</i> more
+frequently?</p>
 
 <blockquote><p>File <i>system_rtl/mfp_pmod_als_spi_receiver.v</i></p><pre>
 
@@ -381,9 +406,67 @@ module mfp_pmod_als_spi_receiver
 endmodule
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><big><b>3.3 Review the glue logic that interface SPI interfacing module in AHB-Lite fabric</b></big></p>
 
-<p>Review</p>
+<p>Search for <i>MFP_DEMO_LIGHT_SENSOR</i> symbol in <i>boards</i>
+and <i>system_rtl</i> directories.  Review the code fragments
+where that symbol occurs.</p>
+
+<p><b>3.3.1  System configuration</b></p>
+
+<p>Review and possibly modify the configuration parameters in the file
+<i>system_rtl/mfp_ahb_lite_matrix_config.vh</i> as follows:</p>
+
+<blockquote><p>File <i>mfp_ahb_lite_matrix_config.vh</i></p><pre>
+
+//
+//  Configuration parameters
+//
+
+// `define MFP_USE_WORD_MEMORY
+// `define MFP_INITIALIZE_MEMORY_FROM_TXT_FILE
+// `define MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
+`define MFP_USE_UART_PROGRAM_LOADER
+`define MFP_DEMO_LIGHT_SENSOR
+// `define MFP_DEMO_INTERRUPTS
+// `define MFP_DEMO_CACHE_MISSES
+// `define MFP_DEMO_PIPE_BYPASS
+
+. . . . . . . . . . . . . . . . . . . . . .
+</pre></blockquote>
+
+<p>Review the added `defines for the physical address of the memory-mapped register
+and I/O identification number for the added light sensor peripheral
+in the same file <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i>:</p>
+
+<blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i></p><pre>
+. . . . . . . . . . . . . . . . . . . . . .
+
+`define MFP_RED_LEDS_ADDR           32'h1f800000
+`define MFP_GREEN_LEDS_ADDR         32'h1f800004
+`define MFP_SWITCHES_ADDR           32'h1f800008
+`define MFP_BUTTONS_ADDR            32'h1f80000C
+`define MFP_7_SEGMENT_HEX_ADDR      32'h1f800010
+
+`ifdef MFP_DEMO_LIGHT_SENSOR
+`define MFP_LIGHT_SENSOR_ADDR       32'h1f800014
+`endif
+
+`define MFP_RED_LEDS_IONUM          4'h0
+`define MFP_GREEN_LEDS_IONUM        4'h1
+`define MFP_SWITCHES_IONUM          4'h2
+`define MFP_BUTTONS_IONUM           4'h3
+`define MFP_7_SEGMENT_HEX_IONUM     4'h4
+                                    
+`ifdef MFP_DEMO_LIGHT_SENSOR            
+`define MFP_LIGHT_SENSOR_IONUM      4'h5
+`endif
+</pre></blockquote>
+
+<p><b>3.3.2  Review the board wrapper file for Xilinx</b></p>
+
+<p>The top-level module <i>nexys4_ddr</i> instantiates board-independent module <i>mfp_system</i>
+and connect the designated GPIO pins to SPI inputs of this module:</p>
 
 <blockquote><p>File <i>boards/nexys4_ddr/nexys4_ddr.v</i></p><pre>
 
@@ -417,9 +500,10 @@ module nexys4_ddr
     assign JA [7] = 1'b0;
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><b>3.3.3  Review the board wrapper file for Altera</b></p>
 
-<p>Review</p>
+<p>The top-level module <i>de0_cv</i> instantiates board-independent module <i>mfp_system</i>
+and connect the designated GPIO pins to SPI inputs of this module:</p>
 
 <blockquote><p>File <i>boards/de0_cv/de0_cv.v</i></p><pre>
 
@@ -457,55 +541,10 @@ module de0_cv
     assign GPIO_1 [26] = 1'b0;
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><b>3.3.4  Review the board-independent top system module</b></p>
 
-<p>Review</p>
-
-<blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i></p><pre>
-
-//
-//  Configuration parameters
-//
-
-// `define MFP_USE_WORD_MEMORY
-// `define MFP_INITIALIZE_MEMORY_FROM_TXT_FILE
-// `define MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
-`define MFP_USE_UART_PROGRAM_LOADER
-`define MFP_DEMO_LIGHT_SENSOR
-// `define MFP_DEMO_INTERRUPTS
-// `define MFP_DEMO_CACHE_MISSES
-// `define MFP_DEMO_PIPE_BYPASS
-
-//
-//  Memory-mapped I/O addresses
-//
-
-. . . . . . . . . . . . . . . . . . . . . .
-
-`define MFP_RED_LEDS_ADDR           32'h1f800000
-`define MFP_GREEN_LEDS_ADDR         32'h1f800004
-`define MFP_SWITCHES_ADDR           32'h1f800008
-`define MFP_BUTTONS_ADDR            32'h1f80000C
-`define MFP_7_SEGMENT_HEX_ADDR      32'h1f800010
-
-`ifdef MFP_DEMO_LIGHT_SENSOR
-`define MFP_LIGHT_SENSOR_ADDR       32'h1f800014
-`endif
-
-`define MFP_RED_LEDS_IONUM          4'h0
-`define MFP_GREEN_LEDS_IONUM        4'h1
-`define MFP_SWITCHES_IONUM          4'h2
-`define MFP_BUTTONS_IONUM           4'h3
-`define MFP_7_SEGMENT_HEX_IONUM     4'h4
-                                    
-`ifdef MFP_DEMO_LIGHT_SENSOR            
-`define MFP_LIGHT_SENSOR_IONUM      4'h5
-`endif
-</pre></blockquote>
-
-<p><b>3.1 Review</b></p>
-
-<p>Review</p>
+<p>Note this module instantiates the CPU core, the AHB-Lite interconnect and the newly
+added SPI interfacing module that works with the light sensor:</p>
 
 <blockquote><p>File <i>system_rtl/mfp_system.v</i></p><pre>
 
@@ -558,9 +597,7 @@ module mfp_system
     `endif
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
-
-<p>Review</p>
+<p><b>3.3.5  Review the code that propagates the received value down the module hierarchy</b></p>
 
 <blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix_with_loader.v</i></p><pre>
 
@@ -595,10 +632,6 @@ module mfp_ahb_lite_matrix_with_loader
     );
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
-
-<p>Review</p>
-
 <blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix.v</i></p><pre>
 
 module mfp_ahb_lite_matrix
@@ -631,9 +664,11 @@ module mfp_ahb_lite_matrix
     );
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><b>3.3.6  Review how GPIO slave connects the value to the system bus</b></p>
 
-<p>Review</p>
+<p>The general-purpose input-output module connects the wires coming from
+several peripherals to AHB-Lite system bus in order to make these peripherals
+visible to the software. The peripherals include buttons, switches, LEDs and now the light sensor:</p>
 
 <blockquote><p>File <i>mfp_ahb_gpio_slave.v</i></p><pre>
 
@@ -738,181 +773,16 @@ module mfp_ahb_gpio_slave
 endmodule
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><big><b>3.5. Connect the light sensor to the board</b></big></p>
 
-<p>Review</p>
+<p>For <i>Digilent</i> boards, such as <i>Nexys4</i>, <i>Nexys4 DDR</i> or
+<i>Basys3</i> can be just inserted into the proper position of JA or JB
+port. Please see pin information in .XDC file and in board documentation
+from Digilent to figure out how to connect the sensor. For <i>Altera/Terasic</i>
+boards you need to use female-to-female jumper wires to connect the sensor to the appropriate
+GPIO pins.</p>
 
-<blockquote><p>File <i>system_rtl/mfp_seven_segment_displays.v</i></p><pre>
-
-module mfp_single_digit_seven_segment_display
-(
-    input      [3:0] digit,
-    output reg [6:0] seven_segments
-);
-
-    always @*
-        case (digit)
-        'h0: seven_segments = 'b1000000;  // a b c d e f g
-        'h1: seven_segments = 'b1111001;
-        'h2: seven_segments = 'b0100100;  //   --a--
-        'h3: seven_segments = 'b0110000;  //  |     |
-        'h4: seven_segments = 'b0011001;  //  f     b
-        'h5: seven_segments = 'b0010010;  //  |     |
-        'h6: seven_segments = 'b0000010;  //   --g--
-        'h7: seven_segments = 'b1111000;  //  |     |
-        'h8: seven_segments = 'b0000000;  //  e     c
-        'h9: seven_segments = 'b0011000;  //  |     |
-        'ha: seven_segments = 'b0001000;  //   --d-- 
-        'hb: seven_segments = 'b0000011;
-        'hc: seven_segments = 'b1000110;
-        'hd: seven_segments = 'b0100001;
-        'he: seven_segments = 'b0000110;
-        'hf: seven_segments = 'b0001110;
-        endcase
-
-endmodule
-
-//--------------------------------------------------------------------
-
-module mfp_multi_digit_display
-(
-    input             clock,
-    input             resetn,
-    input      [31:0] number,
-
-    output reg [ 6:0] seven_segments,
-    output reg        dot,
-    output reg [ 7:0] anodes
-);
-
-    function [6:0] bcd_to_seg (input [3:0] bcd);
-
-        case (bcd)
-        'h0: bcd_to_seg = 'b1000000;  // a b c d e f g
-        'h1: bcd_to_seg = 'b1111001;
-        'h2: bcd_to_seg = 'b0100100;  //   --a--
-        'h3: bcd_to_seg = 'b0110000;  //  |     |
-        'h4: bcd_to_seg = 'b0011001;  //  f     b
-        'h5: bcd_to_seg = 'b0010010;  //  |     |
-        'h6: bcd_to_seg = 'b0000010;  //   --g--
-        'h7: bcd_to_seg = 'b1111000;  //  |     |
-        'h8: bcd_to_seg = 'b0000000;  //  e     c
-        'h9: bcd_to_seg = 'b0011000;  //  |     |
-        'ha: bcd_to_seg = 'b0001000;  //   --d-- 
-        'hb: bcd_to_seg = 'b0000011;
-        'hc: bcd_to_seg = 'b1000110;
-        'hd: bcd_to_seg = 'b0100001;
-        'he: bcd_to_seg = 'b0000110;
-        'hf: bcd_to_seg = 'b0001110;
-        endcase
-
-    endfunction
-
-    reg [2:0] i;
-
-    always @ (posedge clock or negedge resetn)
-    begin
-        if (! resetn)
-        begin
-            seven_segments &lt;=   bcd_to_seg (0);
-            dot            &lt;= ~ 0;
-            anodes         &lt;= ~ 8'b00000001;
-
-            i &lt;= 0;
-        end
-        else
-        begin
-            seven_segments &lt;=   bcd_to_seg (number [i * 4 +: 4]);
-            dot            &lt;= ~ 0;
-            anodes         &lt;= ~ (1 &lt;&lt; i);
-
-            i &lt;= i + 1;
-        end
-    end
-
-endmodule
-</pre></blockquote>
-
-
-
-
-<p><big><b>3.4. Review lab code modifications in <i>system_rtl</i> and
-<i>testbench</i> directories</b></big></p>
-
-<p>Search for <i>MFP_DEMO_PIPE_BYPASS</i> symbol in <i>system_rtl</i> and
-<i>testbench</i> directories. Review the code fragments where that symbol
-occurs.</p>
-
-<p>Modify the configuration parameters in the file
-<i>system_rtl/mfp_ahb_lite_matrix_config.vh</i> as follows:</p>
-
-<blockquote><pre>
-
-//
-//  Configuration parameters
-//
-
-// `define MFP_USE_WORD_MEMORY
-// `define MFP_INITIALIZE_MEMORY_FROM_TXT_FILE
-   `define MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
-   `define MFP_USE_UART_PROGRAM_LOADER
-// `define MFP_DEMO_LIGHT_SENSOR
-// `define MFP_DEMO_CACHE_MISSES
-   `define MFP_DEMO_PIPE_BYPASS
-
-</pre></blockquote>
-
-<p>Review the following fragments of <i>system_rtl/mfp_system.v</i>:</p>
-
-<blockquote><pre>
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-`ifdef MFP_DEMO_PIPE_BYPASS
-    wire         mpc_aselres_e;
-    wire         mpc_aselwr_e;
-    wire         mpc_bselall_e;
-    wire         mpc_bselres_e;
-`endif
-
-    m14k_top m14k_top
-    (
-
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-        .UDI_toudi             ( UDI_toudi             )
-
-`ifdef MFP_DEMO_PIPE_BYPASS
-        ,
-        .mpc_aselres_e         ( mpc_aselres_e         ),     
-        .mpc_aselwr_e          ( mpc_aselwr_e          ),     
-        .mpc_bselall_e         ( mpc_bselall_e         ),     
-        .mpc_bselres_e         ( mpc_bselres_e         )      
-`endif
-
-    );
-
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-    `ifdef MFP_DEMO_CACHE_MISSES
-
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-    `elsif MFP_DEMO_PIPE_BYPASS
-
-    assign IO_GreenLEDs = { { `MFP_N_GREEN_LEDS - 5 { 1'b0 } },
-
-        HCLK,
-        mpc_aselres_e,  // Bypass res_m as src A
-        mpc_bselres_e   // Bypass res_m as src B
-        mpc_aselwr_e,   // Bypass res_w as src A
-        mpc_bselall_e,  // Bypass res_w as src B
-    };
-
-    `endif
-
-</pre></blockquote>
-
-<p><big><b>3.5.  Connect the board to the computer</b></big></p>
+<p><big><b>3.6.  Connect the board to the computer</b></big></p>
 
 <p>For <i>Digilent</i> boards, such as <i>Nexys4</i>, <i>Nexys4 DDR</i> or
 <i>Basys3</i>, this step is obvious.  For <i>Altera/Terasic</i> boards some
@@ -949,84 +819,28 @@ Failing to do so may result in electric damage to the board.</li>
 
 </ol>
 
-<p><big><b>3.6.  Run the synthesis and configure the FPGA with the
+<p><big><b>3.6  Run the synthesis and configure the FPGA with the
 synthesized MIPSfpga system</b></big></p>
 
 <p>This step is identical to the synthesis step in <i>Lab YP1</i></p>
 
-<p><big><b>3.7.  Go to the lab directory and clean it up</b></big></p>
+<p><big><b>3.7  Go to the lab directory and clean it up</b></big></p>
 
 <p>Under Windows:</p>
 
 <blockquote><pre>
-cd programs\03_light_sensor
+cd programs\lab_yp2
 00_clean_all.bat
 </pre></blockquote>
 
 <p>Under Linux:</p>
 
 <blockquote><pre>
-cd programs/03_light_sensor
+cd programs/lab_yp2
 00_clean_all.sh
 </pre></blockquote>
 
-<p><big><b>3.8.  Review the lab program code</b></big></p>
-
-<p>The main program is located in file <i>programs/03_light_sensor/main.c</i>. After
-reset and running the boot sequence the <i>main()</i> function calls one of
-several routines written in assembly language, depending on the position of
-three switches in the board: <i>sw[4]</i>, <i>sw[5]</i>, <i>sw[6]</i>:</p>
-
-<blockquote><p>File <i>programs/03_light_sensor/main.c</i></p>
-<pre>
-
-#include "mfp_memory_mapped_registers.h"
-
-int main ()
-{
-    MFP_7_SEGMENT_HEX = MFP_SWITCHES >> 4;
-
-    switch (MFP_SWITCHES >> 4)
-    {
-        case 0: demo_bypass_a_from_alu_instruction        (); break;
-        case 1: demo_bypass_b_from_alu_instruction        (); break;
-        case 2: demo_bypass_a_and_b_from_alu_instruction  (); break;
-        case 3: demo_bypass_a_from_load_instruction       (); break;
-        case 4: demo_bypass_b_from_load_instruction       (); break;
-        case 5: demo_bypass_a_and_b_from_load_instruction (); break;
-    }
-
-    return 0;
-}
-
-</pre></blockquote>
-
-<p>The assembly subroutines are located in <i>programs/03_light_sensor/demo_bypasses.S</i>.
-They written in a way to cause different types of pipeline forwarding
-in the simplest fashion, with one forwarded register and without cycle timing
-effects due to cache misses. For example, subroutine <i>demo_bypass_a_from_alu_instruction</i>:</p>
-
-<blockquote><p>File <i>programs/03_light_sensor/demo_bypasses.S</i></p>
-<pre>
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-        .text
-
-        .global demo_bypass_a_from_alu_instruction
-
-demo_bypass_a_from_alu_instruction:
-
-        li      t0, 0x001
-        li      t1, 0x010
-1:
-        addiu   t1, t0, 1
-        addu    t2, t1, t0
-        b       1b
-        nop
-
-</pre></blockquote>
-
-<p><big><b>3.9.  Prepare the first software run</b></big></p>
+<p><big><b>3.8  Prepare the first software run</b></big></p>
 
 <p>Following the procedure described in <i>Lab YP1</i>, compile and link the
 program, generate Motorola S-Record file and upload this file into the
@@ -1036,7 +850,7 @@ memory of the synthesized MIPSfpga-based system on the board.</p>
 
 <ol>
 
-<li>cd programs\03_light_sensor</li>
+<li>cd programs\lab_yp2</li>
 
 <li>run 02_compile_and_link.bat</li>
 
@@ -1045,14 +859,11 @@ memory of the synthesized MIPSfpga-based system on the board.</p>
 <li>run 11_check_which_com_port_is_used.bat</li>
 
 <li>edit 12_upload_to_the_board_using_uart.bat based on the result from the
-previous step - set the working port in “set a=” assignment.</li>
+previous step - set the working port in "set a=" assignment.</li>
 
-<li>Make sure the switches 0, 1, 4, 5, 6 on FPGA board are turned off. 
-Switches 0 and 1 control the speed of the clock, while switches 4, 5, and 6
-determines which pipeline bypass demo function is called after reset and
-boot sequence
- - see <i>3.8.  Review the lab program code</i>.  If the switches 0
-and 1 are not off, the loading through UART is not going to work.</li>
+<li>Make sure the switches 0 and 1 on FPGA board are turned off.  Switches 0
+and 1 control the speed of the clock.  If the switches 0 and 1 are not off,
+the loading through UART is not going to work.</li>
 
 <li>run 12_upload_to_the_board_using_uart.bat</li>
 
@@ -1073,7 +884,7 @@ su - $USER
 
 <ol>
 
-<li>cd programs/03_light_sensor</li>
+<li>cd programs/lab_yp2</li>
 
 <li>run ./02_compile_and_link.sh</li>
 
@@ -1082,33 +893,22 @@ su - $USER
 <li>run ./11_check_which_com_port_is_used.sh</li>
 
 <li>edit ./12_upload_to_the_board_using_uart.sh based on the result from the
-previous step - set the working port in “set a=” assignment</li>
+previous step - set the working port in �_oset a=�__ assignment</li>
 
-<li>Make sure the switches 0, 1, 4, 5, 6 on FPGA board are turned off. 
-Switches 0 and 1 control the speed of the clock, while switches 4, 5, and 6
-determines which pipeline bypass demo function is called after reset and
-boot sequence
- - see <i>3.8.  Review the lab program code</i>.  If the switches 0
-and 1 are not off, the loading through UART is not going to work.</li>
+<li>Make sure the switches 0 and 1 on FPGA board are turned off.  Switches 0
+and 1 control the speed of the clock.  If the switches 0 and 1 are not off,
+the loading through UART is not going to work.</li>
 
 <li>./run 12_upload_to_the_board_using_uart.sh</li>
 
 </ol>
 
-<p><big><b>3.10. The first run</b></big></p>
+<p><big><b>3.9 Run the software on the board</b></big></p>
 
-<ol>
-
-<li>Set the switches 4, 5 and 6 on FPGA board to off position. Such setting
-means that after the reset the program will run assembly demo number 0. Make
-sure the switches 0 and 1 are off, otherwise the boot sequence (a sequence
-of processor instructions before <i>main</i> function) will take too long,
-since these switches control the clock frequency.</li>
-
-<li><p>Reset the processor.  The reset buttons for each board are listed
+<p>Reset the processor.  The reset buttons for each board are listed
 in the table below:</p>
 
-<p><table border=1 cellpadding=10 cellspacing=0 rules=all>
+<table border=1 cellpadding=10 cellspacing=0 rules=all>
 <tr>
 <th>Board</th>
 <th>Reset button</th>
@@ -1122,64 +922,14 @@ in the table below:</p>
 <tr><td>Terasic DE1</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE2-115</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE10-Lite</td><td>Button/Key 0</td></tr>
-</table></p>
+</table>
 
-</li>
-
-<li>Turn the switch 0 on.  This will switch the system clock from 25 MHz to
-0.75 Hz, less than one beat per second.  You should see LED 7 start
-blinking, it is connected straight to the system clock.</li>
-
-<li>Check that the seven-segment display shows "0" which is consistent
-with switches 4, 5, 6 and the code of the program.</li>
-
-<li><p>Now turn your attention to LEDs 0, 1, 2, 3. They are connected to the following
-bypass control signals:</p>
-
-<p><table border=1 cellpadding=10 cellspacing=0 rules=all>
-<tr>
-<th rowspan=2>LEDs (left to right)</th>
-<th colspan=2>Bypass control signals</th>
-</tr>
-<tr>
-<th>Name</th>
-<th>Function (according to the comment in Verilog code)</th>
-</tr>
-<tr><td>3</td><td>mpc_aselres_e</td><td>Bypasses result from M stage (res_m) as source A (rs) for the next instruction</td></tr>
-<tr><td>2</td><td>mpc_bselres_e</td><td>Bypasses result from M stage (res_m) as source B (rt) for the next instruction</td></tr>
-<tr><td>1</td><td>mpc_aselwr_e</td><td>Bypasses result from A stage (res_w) as source A (rs) for the next instruction</td></tr>
-<tr><td>0</td><td>mpc_bselall_e</td><td>Bypasses result from A stage (res_w) as source B (rt) for the next instruction</td></tr>
-</table></p>
-
-</li>
-
-<li><p>You can see LED 3 blinking from time to time, indicating bypass of ALU
-result to the source A of the next instruction. This is consistent with demo
-0 code:</p>
-
-<blockquote><p>File <i>programs/03_light_sensor/demo_bypasses.S</i></p>
-<pre>
-        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-1:
-        addiu   t1, t0, 1
-        addu    t2, t1, t0
-        b       1b
-        nop
-
-</pre></blockquote>
-
-</li>
-</ol>
-
-<p><big><b>3.11. The subsequent runs</b></big></p>
-
-<p>Set the switches 4, 5 and 6 on FPGA board to another position (001), set
-the switch 0 to off position, then reset the processor, turn switch 1 on and
-observe the patterns of blinking again.Repeat for all 6 bypass demos, with
-switches 4, 5 and 6 set to 000, 001, 010, 011, 100, 101. Does the expected
-behavior, based on reviewing the assembly code, always matches the pattern?
-If not, look to the logic that uses bypass control signals and try to
-explain what happens.</p>
+<p>At this moment you should see the light meter working
+- the seven-segment should start displaying the level of light.
+If it is not working, check the cables, software and hardware configuration.
+Try bringing the board to the source of light, then cover it with your hand
+and watch the result on the display.
+</p>
 
 <p><big><b>4.  Follow-up projects and exercises</b></big></p>
 
@@ -1212,29 +962,29 @@ MIPSfpga</font></b></p>
 
 <a href="http://store.digilentinc.com/pmod-modules/">
 
-<p><img
+<img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.18.14.png"
 width="150" /><img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.17.47.png"
 width="150" /><img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.16.51.png"
-width="150" /></p>
-
-<p><img
+width="150" />
+<br>
+<img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.14.23.png"
 width="150" /><img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.15.01.png"
 width="150" /><img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.15.42.png"
-width="150" /></p>
-
-<p><img
+width="150" />
+<br>
+<img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.13.59.png"
 width="150" /><img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.13.38.png"
 width="150" /><img
 src="http://www.silicon-russia.com/wp-content/uploads/2016/11/Screenshot-2016-11-23-08.12.55.png"
-width="150" /></p>
+width="150" />
 
 </a>
 

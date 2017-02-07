@@ -363,7 +363,7 @@ memory of the synthesized MIPSfpga-based system on the board.</p>
 <li>run 11_check_which_com_port_is_used.bat</li>
 
 <li>edit 12_upload_to_the_board_using_uart.bat based on the result from the
-previous step - set the working port in “set a=” assignment.</li>
+previous step - set the working port in "set a=" assignment.</li>
 
 <li>Make sure the switches 0, 1, 4, 5, 6 on FPGA board are turned off. 
 Switches 0 and 1 control the speed of the clock, while switches 4, 5, and 6
@@ -402,7 +402,7 @@ su - $USER
 <li>run ./11_check_which_com_port_is_used.sh</li>
 
 <li>edit ./12_upload_to_the_board_using_uart.sh based on the result from the
-previous step - set the working port in “set a=” assignment</li>
+previous step - set the working port in "set a=" assignment</li>
 
 <li>Make sure the switches 0, 1, 4, 5, 6 on FPGA board are turned off. 
 Switches 0 and 1 control the speed of the clock, while switches 4, 5, and 6
@@ -429,7 +429,7 @@ since these switches control the clock frequency.</li>
 <li><p>Reset the processor.  The reset buttons for each board are listed
 in the table below:</p>
 
-<p><table border=1 cellpadding=10 cellspacing=0 rules=all>
+<table border=1 cellpadding=10 cellspacing=0 rules=all>
 <tr>
 <th>Board</th>
 <th>Reset button</th>
@@ -443,7 +443,7 @@ in the table below:</p>
 <tr><td>Terasic DE1</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE2-115</td><td>Button/Key 0</td></tr>
 <tr><td>Terasic DE10-Lite</td><td>Button/Key 0</td></tr>
-</table></p>
+</table>
 
 </li>
 
@@ -457,7 +457,7 @@ with switches 4, 5, 6 and the code of the program.</li>
 <li><p>Now turn your attention to LEDs 0, 1, 2, 3. They are connected to the following
 bypass control signals:</p>
 
-<p><table border=1 cellpadding=10 cellspacing=0 rules=all>
+<table border=1 cellpadding=10 cellspacing=0 rules=all>
 <tr>
 <th rowspan=2>LEDs (left to right)</th>
 <th colspan=2>Bypass control signals</th>
@@ -470,7 +470,7 @@ bypass control signals:</p>
 <tr><td>2</td><td>mpc_bselres_e</td><td>Bypasses result from M stage (res_m) as source B (rt) for the next instruction</td></tr>
 <tr><td>1</td><td>mpc_aselwr_e</td><td>Bypasses result from A stage (res_w) as source A (rs) for the next instruction</td></tr>
 <tr><td>0</td><td>mpc_bselall_e</td><td>Bypasses result from A stage (res_w) as source B (rt) for the next instruction</td></tr>
-</table></p>
+</table>
 
 </li>
 

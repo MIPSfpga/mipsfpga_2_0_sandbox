@@ -8,7 +8,7 @@ BusBlaster board and OpenOCD software</i>.  Such generic steps are not
 described in this section.  Only the steps different from <i>Lab YP1</i> are
 explained in details.</p>
 
-<p><b>3.1 Review software part of the lab</b></p>
+<p><big><b>3.1 Review the software part of the lab</b></big></p>
 
 <p>In order to understand what we are trying to achieve, it makes sense
 start from software in this lab.  Review the following C program.  The
@@ -62,15 +62,15 @@ this register look jmust like a variable.</p>
 #define MFP_LIGHT_SENSOR        (* (volatile unsigned *) MFP_LIGHT_SENSOR_ADDR  )
 </pre></blockquote>
 
-<p><b>3.2 Review the hardware module that handles SPI protocol</b></p>
+<p><big><b>3.2 Review the hardware module that handles SPI protocol</b></big></p>
 
 <p>In this lab we don't need to handle all cases of SPI protocol.  A generic
 flexible interface module would be quite long and complicated.  Such modules
-can be licensed as IP cores.  However we are dealing with a specific sensor,
+can be licensed as a licensable IP core.  However we are dealing with a specific sensor,
 and its interface is fixed: it simply produces 16 bits of data serially when
 <i>cs</i> ("chip select:) signal goes low.  This specific version of SPI
 interface is also relatively slow, so we can sample the data just by
-counting clock cycles and putting the bits into a shift register on specific
+counting clock cycles and putting the received bits into a shift register on specific
 clock cycles.</p>
 
 <p>Study the code below.  How frequently does the signal <i>sample_bit</i>
@@ -127,12 +127,11 @@ module mfp_pmod_als_spi_receiver
 endmodule
 </pre></blockquote>
 
-<p><big><b>3.3.  Review the lab code modifications in <i>boards</i> and
-<i>system_rtl</i> directories</b></big></p>
+<p><big><b>3.3 Review the glue logic that interface SPI interfacing module in AHB-Lite fabric</b></big></p>
 
-<p>Search for <i>MFP_DEMO_LIGHT_SENSOR</i> symbol in <i>boards</i> and
-<i>system_rtl</i> directories.  Review the code fragments where that symbol
-occurs.</p>
+<p>Search for <i>MFP_DEMO_LIGHT_SENSOR</i> symbol in <i>boards</i>
+and <i>system_rtl</i> directories.  Review the code fragments
+where that symbol occurs.</p>
 
 <p><b>3.3.1  System configuration</b></p>
 
@@ -154,11 +153,41 @@ occurs.</p>
 // `define MFP_DEMO_CACHE_MISSES
 // `define MFP_DEMO_PIPE_BYPASS
 
+. . . . . . . . . . . . . . . . . . . . . .
 </pre></blockquote>
 
-<p><b>3.3.2 Review</b></p>
+<p>Review the added `defines for the physical address of the memory-mapped register
+and I/O identification number for the added light sensor peripheral
+in the same file <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i>:</p>
 
-<p>Review</p>
+<blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i></p><pre>
+. . . . . . . . . . . . . . . . . . . . . .
+
+`define MFP_RED_LEDS_ADDR           32'h1f800000
+`define MFP_GREEN_LEDS_ADDR         32'h1f800004
+`define MFP_SWITCHES_ADDR           32'h1f800008
+`define MFP_BUTTONS_ADDR            32'h1f80000C
+`define MFP_7_SEGMENT_HEX_ADDR      32'h1f800010
+
+`ifdef MFP_DEMO_LIGHT_SENSOR
+`define MFP_LIGHT_SENSOR_ADDR       32'h1f800014
+`endif
+
+`define MFP_RED_LEDS_IONUM          4'h0
+`define MFP_GREEN_LEDS_IONUM        4'h1
+`define MFP_SWITCHES_IONUM          4'h2
+`define MFP_BUTTONS_IONUM           4'h3
+`define MFP_7_SEGMENT_HEX_IONUM     4'h4
+                                    
+`ifdef MFP_DEMO_LIGHT_SENSOR            
+`define MFP_LIGHT_SENSOR_IONUM      4'h5
+`endif
+</pre></blockquote>
+
+<p><b>3.3.2  Review the board wrapper file for Xilinx</b></p>
+
+<p>The top-level module <i>nexys4_ddr</i> instantiates board-independent module <i>mfp_system</i>
+and connect the designated GPIO pins to SPI inputs of this module:</p>
 
 <blockquote><p>File <i>boards/nexys4_ddr/nexys4_ddr.v</i></p><pre>
 
@@ -192,9 +221,10 @@ module nexys4_ddr
     assign JA [7] = 1'b0;
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><b>3.3.3  Review the board wrapper file for Altera</b></p>
 
-<p>Review</p>
+<p>The top-level module <i>de0_cv</i> instantiates board-independent module <i>mfp_system</i>
+and connect the designated GPIO pins to SPI inputs of this module:</p>
 
 <blockquote><p>File <i>boards/de0_cv/de0_cv.v</i></p><pre>
 
@@ -232,55 +262,10 @@ module de0_cv
     assign GPIO_1 [26] = 1'b0;
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><b>3.3.4  Review the board-independent top system module</b></p>
 
-<p>Review</p>
-
-<blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix_config.vh</i></p><pre>
-
-//
-//  Configuration parameters
-//
-
-// `define MFP_USE_WORD_MEMORY
-// `define MFP_INITIALIZE_MEMORY_FROM_TXT_FILE
-// `define MFP_USE_SLOW_CLOCK_AND_CLOCK_MUX
-`define MFP_USE_UART_PROGRAM_LOADER
-`define MFP_DEMO_LIGHT_SENSOR
-// `define MFP_DEMO_INTERRUPTS
-// `define MFP_DEMO_CACHE_MISSES
-// `define MFP_DEMO_PIPE_BYPASS
-
-//
-//  Memory-mapped I/O addresses
-//
-
-. . . . . . . . . . . . . . . . . . . . . .
-
-`define MFP_RED_LEDS_ADDR           32'h1f800000
-`define MFP_GREEN_LEDS_ADDR         32'h1f800004
-`define MFP_SWITCHES_ADDR           32'h1f800008
-`define MFP_BUTTONS_ADDR            32'h1f80000C
-`define MFP_7_SEGMENT_HEX_ADDR      32'h1f800010
-
-`ifdef MFP_DEMO_LIGHT_SENSOR
-`define MFP_LIGHT_SENSOR_ADDR       32'h1f800014
-`endif
-
-`define MFP_RED_LEDS_IONUM          4'h0
-`define MFP_GREEN_LEDS_IONUM        4'h1
-`define MFP_SWITCHES_IONUM          4'h2
-`define MFP_BUTTONS_IONUM           4'h3
-`define MFP_7_SEGMENT_HEX_IONUM     4'h4
-                                    
-`ifdef MFP_DEMO_LIGHT_SENSOR            
-`define MFP_LIGHT_SENSOR_IONUM      4'h5
-`endif
-</pre></blockquote>
-
-<p><b>3.1 Review</b></p>
-
-<p>Review</p>
+<p>Note this module instantiates the CPU core, the AHB-Lite interconnect and the newly
+added SPI interfacing module that works with the light sensor:</p>
 
 <blockquote><p>File <i>system_rtl/mfp_system.v</i></p><pre>
 
@@ -333,9 +318,7 @@ module mfp_system
     `endif
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
-
-<p>Review</p>
+<p><b>3.3.5  Review the code that propagates the received value down the module hierarchy</b></p>
 
 <blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix_with_loader.v</i></p><pre>
 
@@ -370,10 +353,6 @@ module mfp_ahb_lite_matrix_with_loader
     );
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
-
-<p>Review</p>
-
 <blockquote><p>File <i>system_rtl/mfp_ahb_lite_matrix.v</i></p><pre>
 
 module mfp_ahb_lite_matrix
@@ -406,9 +385,11 @@ module mfp_ahb_lite_matrix
     );
 </pre></blockquote>
 
-<p><b>3.1 Review</b></p>
+<p><b>3.3.6  Review how GPIO slave connects the value to the system bus</b></p>
 
-<p>Review</p>
+<p>The general-purpose input-output module connects the wires coming from
+several peripherals to AHB-Lite system bus in order to make these peripherals
+visible to the software. The peripherals include buttons, switches, LEDs and now the light sensor:</p>
 
 <blockquote><p>File <i>mfp_ahb_gpio_slave.v</i></p><pre>
 
@@ -513,5 +494,160 @@ module mfp_ahb_gpio_slave
 endmodule
 </pre></blockquote>
 
+<p><big><b>3.5. Connect the light sensor to the board</b></big></p>
 
+<p>For <i>Digilent</i> boards, such as <i>Nexys4</i>, <i>Nexys4 DDR</i> or
+<i>Basys3</i> can be just inserted into the proper position of JA or JB
+port. Please see pin information in .XDC file and in board documentation
+from Digilent to figure out how to connect the sensor. For <i>Altera/Terasic</i>
+boards you need to use female-to-female jumper wires to connect the sensor to the appropriate
+GPIO pins.</p>
 
+<p><big><b>3.6.  Connect the board to the computer</b></big></p>
+
+<p>For <i>Digilent</i> boards, such as <i>Nexys4</i>, <i>Nexys4 DDR</i> or
+<i>Basys3</i>, this step is obvious.  For <i>Altera/Terasic</i> boards some
+additional steps required:</p>
+
+<ol>
+
+<li>Connect USB-to-UART connector to FPGA board.  Either <i>FT232RL</i> or
+<i>PL2303TA</i> that you can by from AliExpress or Radio Shack will do the
+job.  <i>TX</i> output from the connector (green wire on <i>PL2303TA</i>)
+should go to pin 3 from right bottom on Terasic DE0, DE0-CV, DE1, DE2-115
+(right top on DE0-Nano) and <i>GND</i> output (black wire on
+<i>PL2303TA</i>) should be connected to pin 6 from right bottom on Terasic
+DE0, DE0-CV, DE1, DE2-115 (right top on DE0-Nano).  Please consult photo
+picture in <i>Lab YP1</i> to avoid short-circuit or other connection
+problems.</li>
+
+<li>For <i>FT232RL</i> connector: make sure to set 3.3V/5V jumper on
+<i>FT232RL</i> part to 3.3V.</li>
+
+<li>For the boards that require external power in addition to the power that
+comes from USB, connect the power supply.  The boards that require the extra
+power supply include <i>Terasic DE2-115</i>.</li>
+
+<li>Connect FPGA board to the computer using main connection cable provided
+by the board manufacturers.  Make sure to put USB cable to the right jack
+when ambiguity exists (such as in <i>Terasic DE2-115</i> board).</li>
+
+<li>Make sure to power the FPGA board (turn on the power switch) before
+connecting the UART cable from USB-to-UART connector to the computer. 
+Failing to do so may result in electric damage to the board.</li>
+
+<li>Connect USB-to-UART connector to FPGA board.</li>
+
+</ol>
+
+<p><big><b>3.6  Run the synthesis and configure the FPGA with the
+synthesized MIPSfpga system</b></big></p>
+
+<p>This step is identical to the synthesis step in <i>Lab YP1</i></p>
+
+<p><big><b>3.7  Go to the lab directory and clean it up</b></big></p>
+
+<p>Under Windows:</p>
+
+<blockquote><pre>
+cd programs\lab_yp2
+00_clean_all.bat
+</pre></blockquote>
+
+<p>Under Linux:</p>
+
+<blockquote><pre>
+cd programs/lab_yp2
+00_clean_all.sh
+</pre></blockquote>
+
+<p><big><b>3.8  Prepare the first software run</b></big></p>
+
+<p>Following the procedure described in <i>Lab YP1</i>, compile and link the
+program, generate Motorola S-Record file and upload this file into the
+memory of the synthesized MIPSfpga-based system on the board.</p>
+
+<p>Under Windows:</p>
+
+<ol>
+
+<li>cd programs\lab_yp2</li>
+
+<li>run 02_compile_and_link.bat</li>
+
+<li>run 08_generate_motorola_s_record_file.bat</li>
+
+<li>run 11_check_which_com_port_is_used.bat</li>
+
+<li>edit 12_upload_to_the_board_using_uart.bat based on the result from the
+previous step - set the working port in "set a=" assignment.</li>
+
+<li>Make sure the switches 0 and 1 on FPGA board are turned off.  Switches 0
+and 1 control the speed of the clock.  If the switches 0 and 1 are not off,
+the loading through UART is not going to work.</li>
+
+<li>run 12_upload_to_the_board_using_uart.bat</li>
+
+</ol>
+
+<p>Under Linux:</p>
+
+<p>If uploading program to the board first time during the current Linux
+session, add the current user to <i>dialout</i> Linux group. Enter the
+<i>root</i> password when prompted:</p>
+
+<blockquote><pre>
+sudo adduser $USER dialout
+su - $USER
+</pre></blockquote>
+
+<p>After that:</p>
+
+<ol>
+
+<li>cd programs/lab_yp2</li>
+
+<li>run ./02_compile_and_link.sh</li>
+
+<li>run ./08_generate_motorola_s_record_file.sh</li>
+
+<li>run ./11_check_which_com_port_is_used.sh</li>
+
+<li>edit ./12_upload_to_the_board_using_uart.sh based on the result from the
+previous step - set the working port in â_oset a=â__ assignment</li>
+
+<li>Make sure the switches 0 and 1 on FPGA board are turned off.  Switches 0
+and 1 control the speed of the clock.  If the switches 0 and 1 are not off,
+the loading through UART is not going to work.</li>
+
+<li>./run 12_upload_to_the_board_using_uart.sh</li>
+
+</ol>
+
+<p><big><b>3.9 Run the software on the board</b></big></p>
+
+<p>Reset the processor.  The reset buttons for each board are listed
+in the table below:</p>
+
+<table border=1 cellpadding=10 cellspacing=0 rules=all>
+<tr>
+<th>Board</th>
+<th>Reset button</th>
+</tr>
+<tr><td>Digilent Basys3</td><td>Up</td></tr>
+<tr><td>Digilent Nexys4</td><td>Dedicated CPU Reset</td></tr>
+<tr><td>Digilent Nexys4 DDR</td><td>Dedicated CPU Reset</td></tr>
+<tr><td>Terasic DE0</td><td>Button/Key 0</td></tr>
+<tr><td>Terasic DE0-CV</td><td>Dedicated reset button</td></tr>
+<tr><td>Terasic DE0-Nano</td><td>Button/Key 0</td></tr>
+<tr><td>Terasic DE1</td><td>Button/Key 0</td></tr>
+<tr><td>Terasic DE2-115</td><td>Button/Key 0</td></tr>
+<tr><td>Terasic DE10-Lite</td><td>Button/Key 0</td></tr>
+</table>
+
+<p>At this moment you should see the light meter working
+- the seven-segment should start displaying the level of light.
+If it is not working, check the cables, software and hardware configuration.
+Try bringing the board to the source of light, then cover it with your hand
+and watch the result on the display.
+</p>
