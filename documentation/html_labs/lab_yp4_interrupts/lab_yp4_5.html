@@ -233,7 +233,7 @@ reliable than the operating system.</p>
 switches its mode from user to kernel and jumps to an exception handler, a
 piece of code that handles the exception.  When process the exception, the
 operating system performs the necessary actions.  Examples of such
-actions:<p>
+actions:</p>
 
 <ul>
 
@@ -254,7 +254,7 @@ accessed by the application code.</li>
 
 <li>There are also special user-mode instructions that cause the intentional
 exeptions, requesting the system to perform some action in kernel mode.  In
-MIPS such instruction is called <i>syscall.</i>
+MIPS such instruction is called <i>syscall.</i></li>
 
 <li>Finally, an exception can be caused by an illegal instruction or an
 instruction that is not permitted in user mode.  The exception handler can
@@ -265,7 +265,7 @@ try to emulate the instruction instead of terminating the user code.</li>
 <p>Create a lab using MIPSfpga that demonstrates how the processor entering
 the user mode.  This lab can expose <i>KSU</i> ("kernel/supervisor/user")
 field of Coprocessor 0 <i>Status</i> register by connecting it to the LEDs
-on FPGA board and running the system using slow 0.75 Hz or 12.5 Hz clock.<p>
+on FPGA board and running the system using slow 0.75 Hz or 12.5 Hz clock.</p>
 
 <p>The main challenge in creating this lab is the need to modify the boot
 code of the software example.  The current boot code exists the reset into
