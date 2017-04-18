@@ -24,7 +24,6 @@ module mfp_ahb_ram_slave
 
     // Ignored: HMASTLOCK, HPROT
     // TODO: SI_Endian
-    // TODO: Add delaying HBURST and HSIZE
 
     assign HREADY = 1'b1;
     assign HRESP  = 1'b0;
